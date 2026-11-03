@@ -225,8 +225,6 @@ if [ "$NOTARIZE" -eq 1 ]; then
     echo "Notarized and stapled: $DMG"
     echo "To publish, upload to ${DOWNLOAD_BASE}/: $DMG_NAME, $SRC_NAME.tar.gz and $APPCAST (as appcast.xml)."
 else
-    echo "Signed with Developer ID but NOT notarized: $DMG"
-    echo "Gatekeeper blocks it on other Macs. Store the notary credentials once (docs/RELEASING.md):"
-    echo "  xcrun notarytool store-credentials $NOTARY_PROFILE --key <AuthKey_XXXXXXXXXX.p8> --key-id <key ID> --issuer <issuer ID>"
-    echo "then run scripts/release.sh again."
+    echo "Signed with Developer ID but not notarized yet: $DMG"
+    echo "Next, once: scripts/notarize.sh (notarizes with the Apple ID signed in to Xcode; docs/RELEASING.md)."
 fi
