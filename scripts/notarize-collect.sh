@@ -86,12 +86,19 @@ if SIGNATURE=$("$SPARKLE_BIN/sign_update" "$DMG"); then
     </channel>
 </rss>
 XML
-    if grep -q "<sparkle:version>$BUILD</sparkle:version>" "$APPCAST"; then
-        echo "$APPCAST already lists build $BUILD; left it unchanged ($OUT/appcast-item.xml has the new entry)"
+    # A second run makes a new DMG (other bytes, other signature): its entry replaces the one for the same build,
+    # or Sparkle would reject the download.
+    replaced=$(grep -c "<sparkle:version>$BUILD</sparkle:version>" "$APPCAST" || true)
+    awk -v item="$OUT/appcast-item.xml" -v build="<sparkle:version>$BUILD</sparkle:version>" '
+        /<item>/ { held = $0; holding = 1; same = 0; next }
+        holding { held = held "\n" $0; if (index($0, build)) same = 1
+                  if (/<\/item>/) { holding = 0; if (!same) print held }; next }
+        { print }
+        /<!-- releases:/ { while ((getline line < item) > 0) print line }' "$APPCAST" > "$OUT/appcast.xml"
+    mv "$OUT/appcast.xml" "$APPCAST"
+    if [ "$replaced" -gt 0 ]; then
+        echo "Replaced the Burrow $VERSION ($BUILD) entry in $APPCAST with this DMG's"
     else
-        awk -v item="$OUT/appcast-item.xml" \
-            '{ print } /<!-- releases:/ { while ((getline line < item) > 0) print line }' "$APPCAST" > "$OUT/appcast.xml"
-        mv "$OUT/appcast.xml" "$APPCAST"
         echo "Added Burrow $VERSION ($BUILD) to $APPCAST"
     fi
 else

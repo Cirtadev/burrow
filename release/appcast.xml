@@ -8,11 +8,11 @@
         <!-- releases: scripts/release.sh adds the newest below this line -->
         <item>
             <title>Burrow 0.3.5</title>
-            <pubDate>Tue, 03 Nov 2026 13:21:34 +0000</pubDate>
+            <pubDate>Tue, 03 Nov 2026 13:23:09 +0000</pubDate>
             <sparkle:version>8</sparkle:version>
             <sparkle:shortVersionString>0.3.5</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/Cirtadev/burrow/releases/download/v0.3.5/Burrow-0.3.5.dmg" sparkle:edSignature="O4MaevpomJmcAFIjh9pkZOK++gLTC1ogR5kPdfXb4HgPX6bWUy4EqTVzn2mRHa7VYmy/+K3oDp5ATEtBUc+JBA==" length="4766779" type="application/x-apple-diskimage"/>
+            <enclosure url="https://github.com/Cirtadev/burrow/releases/download/v0.3.5/Burrow-0.3.5.dmg" sparkle:edSignature="UONvJeF1kVoF3kMnWde5JQhGNtx2p6c6Xw9IGL6UqtEp8sMOiAqWoC6x8JY/GIUaOpcty6K1bh46xF2GwAp5DQ==" length="4766784" type="application/x-apple-diskimage"/>
         </item>
         <item>
             <title>Burrow 0.3.4</title>
