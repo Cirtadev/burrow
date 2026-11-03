@@ -19,7 +19,7 @@ done
 grep -q "<sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>" "$APPCAST" \
     || die "$APPCAST has no entry for $VERSION"
 
-# The owner's own VPN details must never ship in the public source (see README › Release). They are listed, one
+# The owner's own VPN details must never ship in the public source (see docs/RELEASING.md). They are listed, one
 # extended regex per line, in scripts/private-patterns.local, which stays out of git.
 PATTERNS=scripts/private-patterns.local
 if [ -s "$PATTERNS" ]; then

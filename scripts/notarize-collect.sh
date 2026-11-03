@@ -63,6 +63,7 @@ ditto -c -k --sequesterRsrc --keepParent "$APP" "$OUT/Burrow-$VERSION.zip"
 
 step "Signing the update for Sparkle"
 if SIGNATURE=$("$SPARKLE_BIN/sign_update" "$DMG"); then
+    NOTES=release/notes/$VERSION.html
     {
         echo "        <item>"
         echo "            <title>Burrow $VERSION</title>"
@@ -70,6 +71,7 @@ if SIGNATURE=$("$SPARKLE_BIN/sign_update" "$DMG"); then
         echo "            <sparkle:version>$BUILD</sparkle:version>"
         echo "            <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>"
         echo "            <sparkle:minimumSystemVersion>$MIN_OS</sparkle:minimumSystemVersion>"
+        [ -f "$NOTES" ] && echo "            <description><![CDATA[$(cat "$NOTES")]]></description>"
         echo "            <enclosure url=\"$DOWNLOAD_BASE/$DMG_NAME\" $SIGNATURE type=\"application/x-apple-diskimage\"/>"
         echo "        </item>"
     } > "$OUT/appcast-item.xml"

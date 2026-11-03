@@ -5,7 +5,7 @@
 #   appcast-item.xml                the Sparkle entry for it (merged into release/appcast.xml when notarized)
 #   Burrow-<version>-source.tar.gz  the corresponding source, with OpenVPNAdapter and Sparkle (AGPL)
 #   SHA256SUMS
-# Uploads and publishes nothing. README › Release has the one-time setup and the upload steps.
+# Uploads and publishes nothing. docs/RELEASING.md has the one-time setup and the upload steps.
 # Run it in Terminal.app, not from a sandboxed tool: it uses your Xcode account (-allowProvisioningUpdates),
 # and an xcodebuild that cannot read that account's keychain token drops it from Xcode › Settings › Accounts.
 set -euo pipefail
@@ -34,7 +34,7 @@ fi
 NOTARIZE=1
 if ! xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>&1; then
     NOTARIZE=0
-    echo "No notarytool profile \"$NOTARY_PROFILE\": building a signed, NOT notarized disk image (README › Release)."
+    echo "No notarytool profile \"$NOTARY_PROFILE\": building a signed, NOT notarized disk image (docs/RELEASING.md)."
 fi
 
 # Keep earlier releases: move the previous build/release aside instead of deleting its DMGs and archive.
@@ -113,7 +113,7 @@ for code in "$APP" "$SYSEX"; do
     grep -q '^CodeDirectory.*flags=.*runtime' <<< "$signature" || die "$name lacks the hardened runtime"
     # Developer ID needs the -systemextension variant of the Network Extension entitlement, in app and extension.
     grep -q '<string>packet-tunnel-provider-systemextension</string>' <<< "$entitlements" \
-        || die "$name lacks packet-tunnel-provider-systemextension (see README › Release)"
+        || die "$name lacks packet-tunnel-provider-systemextension (see docs/RELEASING.md)"
     [ "$(plutil -extract ProvisionsAllDevices raw -o - - <<< "$profile" 2>/dev/null)" = true ] \
         || die "$name does not embed a Developer ID provisioning profile"
     echo "$name: Developer ID ($(plutil -extract Name raw -o - - <<< "$profile")), hardened runtime, timestamp, packet-tunnel-provider-systemextension"
@@ -198,7 +198,7 @@ EOF
         echo "Not notarized: the entry is in $OUT/appcast-item.xml only, not in $APPCAST."
     fi
 else
-    echo "warning: sign_update failed, so there is no appcast entry (README › Release › Sparkle key)."
+    echo "warning: sign_update failed, so there is no appcast entry (docs/RELEASING.md › Sparkle key)."
 fi
 
 step "Packing the corresponding source (AGPL)"
@@ -226,7 +226,7 @@ if [ "$NOTARIZE" -eq 1 ]; then
     echo "To publish, upload to ${DOWNLOAD_BASE}/: $DMG_NAME, $SRC_NAME.tar.gz and $APPCAST (as appcast.xml)."
 else
     echo "Signed with Developer ID but NOT notarized: $DMG"
-    echo "Gatekeeper blocks it on other Macs. Store the notary credentials once (README › Release):"
+    echo "Gatekeeper blocks it on other Macs. Store the notary credentials once (docs/RELEASING.md):"
     echo "  xcrun notarytool store-credentials $NOTARY_PROFILE --key <AuthKey_XXXXXXXXXX.p8> --key-id <key ID> --issuer <issuer ID>"
     echo "then run scripts/release.sh again."
 fi

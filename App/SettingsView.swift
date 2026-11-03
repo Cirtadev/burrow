@@ -39,6 +39,8 @@ struct SettingsView: View {
     var navigation = SettingsNavigation()
     var onSave: (SettingsDraft) -> Void = { _ in }
     var onCancel: () -> Void = {}
+    /// False for screenshots: off-screen captures leave the tab bar's glass blank.
+    var showsTabs = true
     @State private var tab = "configurations"
     @State private var note: String?
     /// The configuration whose routing table is open.
@@ -46,16 +48,22 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TabView(selection: $tab) {
-                configurations
-                    .tabItem { Label("Configurations", systemImage: "network.badge.shield.half.filled") }
-                    .tag("configurations")
-                general
-                    .tabItem { Label("General", systemImage: "gearshape") }
-                    .tag("general")
-                AboutView()
-                    .tabItem { Label("About", systemImage: "info.circle") }
-                    .tag("about")
+            Group {
+                if showsTabs {
+                    TabView(selection: $tab) {
+                        configurations
+                            .tabItem { Label("Configurations", systemImage: "network.badge.shield.half.filled") }
+                            .tag("configurations")
+                        general
+                            .tabItem { Label("General", systemImage: "gearshape") }
+                            .tag("general")
+                        AboutView()
+                            .tabItem { Label("About", systemImage: "info.circle") }
+                            .tag("about")
+                    }
+                } else {
+                    configurations
+                }
             }
             .padding([.horizontal, .top], 12)
 
@@ -409,20 +417,22 @@ private struct ProfileEditor: View {
 
     private static let setupKeyHelp = "The setup key is not a 6-digit code: it's the secret your authenticator app got from the QR code when the token was set up. Copy it from the app (1Password, Bitwarden, Authy…), or screenshot the QR code in the VPN portal and use Read QR Code Image. The current code must then match your phone. No key? Choose “Ask me for the code”."
 
-    private var otpFooter: String {
+    /// How the code reaches the server: the ⓘ next to "Send the code" (or "The configuration asks").
+    private var deliveryHelp: String {
         let delivery = summary.staticChallenge != nil
             ? "The configuration has a static challenge, so the code goes in a field of its own."
             : profile.codeDelivery == .appended
-            ? "Burrow sends the code right after the password (password123456), which most servers expect. If yours asks for it in a second step, choose “When the server asks for it”."
+            ? "Burrow sends the code right after the password (for example, “mypassword123456” for the password “mypassword” and the code 123456), which most servers expect. If yours asks for it in a second step, choose “When the server asks for it”."
             : "Burrow sends the password alone and the code when the server asks for it (a dynamic challenge or CR_TEXT)."
-        let web = " If the server uses a sign-in page (SSO), Burrow opens it in your browser."
+        return delivery + " If the server uses a sign-in page (SSO), Burrow opens it in your browser."
+    }
+
+    /// The section's note: what no ⓘ explains.
+    private var otpFooter: String? {
         switch profile.otpMode {
-        case .automatic:
-            return delivery + web
-        case .prompt:
-            return "Burrow asks for the code from your authenticator each time it connects, and after a drop. " + delivery + web
-        case .off:
-            return "Burrow sends the username and password only. If the server asks a question (a PIN, an SMS code) or sends you to a sign-in page, Burrow shows it when you connect."
+        case .automatic: nil
+        case .prompt: "Burrow asks for the code from your authenticator each time it connects, and after a drop."
+        case .off: "Burrow sends the username and password only. If the server asks a question (a PIN, an SMS code) or sends you to a sign-in page, Burrow shows it when you connect."
         }
     }
 
@@ -431,7 +441,7 @@ private struct ProfileEditor: View {
             Section {
                 TextField("Name", text: $profile.name)
                 LabeledContent("OpenVPN file") {
-                    VStack(alignment: .trailing, spacing: 2) {
+                    VStack(alignment: .trailing, spacing: 8) {
                         Text(profile.summary.problem ?? profile.summary.serverDescription)
                             .foregroundStyle(profile.summary.problem == nil ? Color.primary : Color.red)
                         Button("Replace…", action: replaceFile).controlSize(.small)
@@ -511,20 +521,38 @@ private struct ProfileEditor: View {
                         OTPPreview(secret: profile.otpSecret)
                     }
                     if let challenge = summary.staticChallenge {
-                        LabeledContent("The configuration asks", value: challenge)
+                        LabeledContent {
+                            Text(challenge)
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text("The configuration asks")
+                                InfoButton(text: deliveryHelp)
+                            }
+                        }
                     } else if profile.otpMode != .off {
-                        Picker("Send the code", selection: $profile.codeDelivery) {
-                            Text("With the password").tag(VPNProfile.CodeDelivery.appended)
-                            Text("When the server asks for it").tag(VPNProfile.CodeDelivery.challenge)
+                        LabeledContent {
+                            Picker("Send the code", selection: $profile.codeDelivery) {
+                                Text("With the password").tag(VPNProfile.CodeDelivery.appended)
+                                Text("When the server asks for it").tag(VPNProfile.CodeDelivery.challenge)
+                            }
+                            .labelsHidden()
+                            .fixedSize()
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text("Send the code")
+                                InfoButton(text: deliveryHelp)
+                            }
                         }
                     }
                 } header: {
                     Text("One-time password")
                 } footer: {
-                    Text(otpFooter)
-                        .font(.caption).foregroundStyle(.secondary)
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if let otpFooter {
+                        Text(otpFooter)
+                            .font(.caption).foregroundStyle(.secondary)
+                            .multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
             }
 
@@ -711,7 +739,7 @@ struct InfoButton: View {
 
     var body: some View {
         Button { shown.toggle() } label: {
-            Image(systemName: "info.circle").foregroundStyle(.secondary)
+            Image(systemName: "info.circle").foregroundStyle(.primary)
         }
         .buttonStyle(.borderless)
         .help(text)

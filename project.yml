@@ -49,7 +49,7 @@ targets:
         CirtadevWebsites: [https://cirtadev.com, https://cirta.dev]
         SUFeedURL: $(BURROW_FEED_URL)
         # EdDSA key made with Sparkle's generate_keys on 2026-10-20; the private half is in the login keychain of
-        # the Mac that made it (README › Release › Sparkle key).
+        # the Mac that made it (docs/RELEASING.md › Sparkle key).
         SUPublicEDKey: lvnBuKxZYQeKzpiDt1v+6hOI8M/u+0CGhyfZuuafB7w=
     entitlements:
       path: App/Burrow.entitlements

@@ -15,7 +15,9 @@ enum Snapshot {
                              username: "alice", savePassword: false, otpMode: .prompt)
         let draft = SettingsDraft(profiles: [lab, office], selection: office.id, general: GeneralSettings())
 
-        render(SettingsView(draft: draft, tunnelblickSources: []), to: directory, name: "settings")
+        render(SettingsView(draft: draft, tunnelblickSources: [], showsTabs: false), to: directory, name: "settings")
+        let asking = SettingsDraft(profiles: [lab, office], selection: lab.id, general: GeneralSettings())
+        render(SettingsView(draft: asking, tunnelblickSources: [], showsTabs: false), to: directory, name: "settings-ask")
         render(SignInView(profile: lab, message: nil), to: directory, name: "sign-in")
         let question = TunnelChallenge(id: 1, kind: .dynamic, text: "Enter the code we sent to your phone by SMS.",
                                        echo: true, responseRequired: true)
@@ -76,10 +78,7 @@ enum Snapshot {
             let arrowX = panelSize.width - 70
             let image = NSImage(size: canvas, flipped: false) { _ in
                 appearance.performAsCurrentDrawingAppearance {
-                    NSColor.windowBackgroundColor.blended(withFraction: 0.3, of: dark ? .black : .gray)!.setFill()
-                    NSRect(origin: .zero, size: canvas).fill()
-                    NSColor(white: dark ? 0.12 : 0.92, alpha: 1).setFill()
-                    NSRect(x: 0, y: canvas.height - menuBar, width: canvas.width, height: menuBar).fill()
+                    // Transparent around the panel: on a web page a painted backdrop shows as a box.
                     let icon = NSImage(systemSymbolName: "lock.shield.fill", accessibilityDescription: nil)!
                         .withSymbolConfiguration(.init(pointSize: 17, weight: .semibold))!
                     let tinted = NSImage(size: icon.size, flipped: false) { rect in
@@ -88,8 +87,12 @@ enum Snapshot {
                         rect.fill(using: .sourceAtop)
                         return true
                     }
-                    tinted.draw(at: NSPoint(x: margin + arrowX - icon.size.width / 2, y: canvas.height - menuBar / 2 - icon.size.height / 2),
-                                from: .zero, operation: .sourceOver, fraction: 1)
+                    let iconOrigin = NSPoint(x: margin + arrowX - icon.size.width / 2, y: canvas.height - menuBar / 2 - icon.size.height / 2)
+                    // A patch of menu bar, so the icon shows on any page colour.
+                    NSColor(white: dark ? 0.16 : 0.9, alpha: 1).setFill()
+                    NSBezierPath(roundedRect: NSRect(x: iconOrigin.x - 9, y: iconOrigin.y - 4, width: icon.size.width + 18,
+                                                     height: icon.size.height + 8), xRadius: 6, yRadius: 6).fill()
+                    tinted.draw(at: iconOrigin, from: .zero, operation: .sourceOver, fraction: 1)
 
                     let origin = NSPoint(x: margin, y: canvas.height - menuBar - 1 - panelSize.height)
                     let transform = AffineTransform(translationByX: origin.x, byY: origin.y)
@@ -104,7 +107,11 @@ enum Snapshot {
                     NSColor.windowBackgroundColor.setFill()
                     shape.fill()
                     NSGraphicsContext.restoreGraphicsState()
+                    // The content is square: clipped, its corners follow the panel's rounded ones.
+                    NSGraphicsContext.saveGraphicsState()
+                    shape.addClip()
                     content.draw(in: NSRect(origin: origin, size: body))
+                    NSGraphicsContext.restoreGraphicsState()
                     (dark ? NSColor.white.withAlphaComponent(0.18) : NSColor.black.withAlphaComponent(0.12)).setStroke()
                     shape.lineWidth = 1
                     shape.stroke()
@@ -131,7 +138,8 @@ enum Snapshot {
             RunLoop.current.run(until: Date().addingTimeInterval(0.5))
 
             guard let rep = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) else { continue }
-            hosting.cacheDisplay(in: hosting.bounds, to: rep)
+            // AppKit controls (the Settings tab bar) draw in the current drawing appearance, not the view's.
+            appearance?.performAsCurrentDrawingAppearance { hosting.cacheDisplay(in: hosting.bounds, to: rep) }
             guard let png = rep.representation(using: .png, properties: [:]) else { continue }
             let url = URL(fileURLWithPath: directory).appendingPathComponent("\(name)-\(dark ? "dark" : "light").png")
             try? png.write(to: url)

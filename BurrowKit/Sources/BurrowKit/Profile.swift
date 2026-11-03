@@ -16,7 +16,7 @@ public struct VPNProfile: Codable, Equatable, Sendable, Identifiable {
 
     /// How the server takes the code.
     public enum CodeDelivery: String, Codable, Sendable, CaseIterable {
-        /// Password and code in one field ("password123456"), what most servers expect.
+        /// Password and code in one field (e.g. "mypassword123456"), what most servers expect.
         case appended
         /// The server asks for the code after checking the password (dynamic challenge or CR_TEXT).
         case challenge
