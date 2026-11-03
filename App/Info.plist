@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Burrow</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>CirtadevWebsites</key>
+	<array>
+		<string>https://cirtadev.com</string>
+		<string>https://cirta.dev</string>
+	</array>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Cirtadev GmbH. All rights reserved.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>When your network uses the same addresses as the VPN, Burrow looks for the devices on it, so they stay reachable while the rest of those addresses goes through the VPN.</string>
+	<key>SUFeedURL</key>
+	<string>$(BURROW_FEED_URL)</string>
+	<key>SUPublicEDKey</key>
+	<string>lvnBuKxZYQeKzpiDt1v+6hOI8M/u+0CGhyfZuuafB7w=</string>
+</dict>
+</plist>

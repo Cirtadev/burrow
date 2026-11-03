@@ -1,0 +1,108 @@
+name: Burrow
+options:
+  bundleIdPrefix: dev.cirta # cirta.dev, Cirtadev GmbH
+  deploymentTarget:
+    macOS: "15.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    DEVELOPMENT_TEAM: GXHYVQ677L # Cirtadev GmbH
+    CODE_SIGN_STYLE: Automatic
+    # Day-to-day builds; scripts/release.sh exports the archive with Developer ID instead.
+    CODE_SIGN_IDENTITY: Apple Development
+    ENABLE_HARDENED_RUNTIME: YES
+    MARKETING_VERSION: 0.3.5
+    # Sparkle compares this: raise it for every release. scripts/build-app.sh appends a timestamp.
+    CURRENT_PROJECT_VERSION: 8
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+    # The Sparkle feed, the one place it is set (Info.plist SUFeedURL): the newest GitHub release's appcast.xml.
+    # Each DMG is downloaded from its own release (.../releases/download/v<version>/); scripts/publish.sh uploads.
+    BURROW_FEED_URL: https://github.com/Cirtadev/burrow/releases/latest/download/appcast.xml
+packages:
+  BurrowKit:
+    path: BurrowKit
+  OpenVPNAdapter:
+    # Upstream revision 33afba0 plus a control-channel send for CR_TEXT answers (ThirdParty/OpenVPNAdapter/BURROW-CHANGES.md).
+    path: ThirdParty/OpenVPNAdapter
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    exactVersion: 2.10.0
+targets:
+  Burrow:
+    type: application
+    platform: macOS
+    sources: [App]
+    dependencies:
+      - package: BurrowKit
+      - package: Sparkle
+      - target: BurrowTunnel # embedded in Contents/Library/SystemExtensions
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Burrow
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSUIElement: true
+        NSLocalNetworkUsageDescription: When your network uses the same addresses as the VPN, Burrow looks for the devices on it, so they stay reachable while the rest of those addresses goes through the VPN.
+        LSApplicationCategoryType: public.app-category.utilities
+        NSHumanReadableCopyright: © 2026 Cirtadev GmbH. All rights reserved.
+        CirtadevWebsites: [https://cirtadev.com, https://cirta.dev]
+        SUFeedURL: $(BURROW_FEED_URL)
+        # EdDSA key made with Sparkle's generate_keys on 2026-10-20; the private half is in the login keychain of
+        # the Mac that made it (README › Release › Sparkle key).
+        SUPublicEDKey: lvnBuKxZYQeKzpiDt1v+6hOI8M/u+0CGhyfZuuafB7w=
+    entitlements:
+      path: App/Burrow.entitlements
+      properties:
+        # Development value. Xcode 27's Developer ID export turns it into packet-tunnel-provider-systemextension,
+        # which scripts/release.sh checks.
+        com.apple.developer.networking.networkextension: [packet-tunnel-provider]
+        com.apple.developer.system-extension.install: true
+        keychain-access-groups: [$(AppIdentifierPrefix)dev.cirta.burrow.shared]
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: dev.cirta.burrow
+      PRODUCT_NAME: Burrow
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      SWIFT_VERSION: "6.0"
+    scheme: {}
+  BurrowTunnel:
+    # A system extension, not an app extension: Developer ID distribution only supports Network Extension
+    # providers packaged this way. macOS copies it to /Library/SystemExtensions and runs it as root.
+    type: system-extension
+    platform: macOS
+    sources: [Tunnel]
+    dependencies:
+      - package: BurrowKit
+      - package: OpenVPNAdapter
+      - sdk: SystemConfiguration.framework # OpenVPNReachability
+      - sdk: NetworkExtension.framework
+    info:
+      path: Tunnel/Info.plist
+      properties:
+        CFBundleDisplayName: Burrow Tunnel
+        CFBundlePackageType: SYSX
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSHumanReadableCopyright: © 2026 Cirtadev GmbH. All rights reserved.
+        NSSystemExtensionUsageDescription: Burrow's VPN tunnel runs your OpenVPN connection.
+        NetworkExtension:
+          # Must start with an app group of this extension (com.apple.security.application-groups below).
+          NEMachServiceName: $(TeamIdentifierPrefix)dev.cirta.burrow.tunnel
+          NEProviderClasses:
+            com.apple.networkextension.packet-tunnel: $(PRODUCT_MODULE_NAME).PacketTunnelProvider
+    entitlements:
+      path: Tunnel/BurrowTunnel.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.application-groups: [$(TeamIdentifierPrefix)dev.cirta.burrow]
+        com.apple.developer.networking.networkextension: [packet-tunnel-provider]
+        # No keychain access: the app hands the credentials over in the start options.
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: dev.cirta.burrow.tunnel
+      # macOS wants the bundle named after its identifier: dev.cirta.burrow.tunnel.systemextension.
+      PRODUCT_NAME: $(PRODUCT_BUNDLE_IDENTIFIER)
+      PRODUCT_MODULE_NAME: BurrowTunnel
+      SKIP_INSTALL: YES
+      # OpenVPNAdapter's Objective-C delegate API predates strict concurrency.
+      SWIFT_VERSION: "5.0"

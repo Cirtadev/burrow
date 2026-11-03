@@ -1,0 +1,15 @@
+.DS_Store
+xcuserdata/
+.swiftpm/
+.build/
+
+# Generated: scripts/build-app.sh and scripts/release.sh run XcodeGen from project.yml.
+/Burrow.xcodeproj/
+/build/
+build-*.log
+
+# Third-party binaries and their analysis, never published.
+/re/
+
+# The leak check's private patterns (scripts/publish.sh).
+/scripts/private-patterns.local

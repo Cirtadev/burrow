@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+    <channel>
+        <title>Burrow</title>
+        <link>https://github.com/Cirtadev/burrow/releases/latest/download/appcast.xml</link>
+        <description>Burrow updates</description>
+        <language>en</language>
+        <!-- releases: scripts/release.sh adds the newest below this line -->
+        <item>
+            <title>Burrow 0.3.4</title>
+            <pubDate>Wed, 21 Oct 2026 10:35:40 +0000</pubDate>
+            <sparkle:version>7</sparkle:version>
+            <sparkle:shortVersionString>0.3.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/Cirtadev/burrow/releases/download/v0.3.4/Burrow-0.3.4.dmg" sparkle:edSignature="hVjArkEte+DYwFYOxjfbw/Mrbg5feD9OiAUA2lLaCUUghV4Uz1QeHdICIAduusPCoCDqTTQbherDIenUz2ObDA==" length="4311539" type="application/x-apple-diskimage"/>
+        </item>
+        <item>
+            <title>Burrow 0.3.3</title>
+            <pubDate>Tue, 20 Oct 2026 13:24:49 +0000</pubDate>
+            <sparkle:version>6</sparkle:version>
+            <sparkle:shortVersionString>0.3.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/Cirtadev/burrow/releases/download/v0.3.3/Burrow-0.3.3.dmg" sparkle:edSignature="i/bUIXSMwIoASjrFPVOdOojTEuqrJQeSueHgHVCJa3o+mDXy2gO97o3tIbn1YxLqJxH4eWz+WcljzhVVrYydCA==" length="4262309" type="application/x-apple-diskimage"/>
+        </item>
+        <item>
+            <title>Burrow 0.3.2</title>
+            <pubDate>Tue, 20 Oct 2026 13:13:55 +0000</pubDate>
+            <sparkle:version>5</sparkle:version>
+            <sparkle:shortVersionString>0.3.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/Cirtadev/burrow/releases/download/v0.3.2/Burrow-0.3.2.dmg" sparkle:edSignature="gRZTT5CeYLgEub15G35xcaCyv/eAuHtCmkZHz0ZfKq6RpbZVzg8syAmhmswAg1zobp4LbRg9rLmXoH6PCI5WDg==" length="4262418" type="application/x-apple-diskimage"/>
+        </item>
+        <item>
+            <title>Burrow 0.3.1</title>
+            <pubDate>Tue, 20 Oct 2026 13:03:38 +0000</pubDate>
+            <sparkle:version>4</sparkle:version>
+            <sparkle:shortVersionString>0.3.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/Cirtadev/burrow/releases/download/v0.3.1/Burrow-0.3.1.dmg" sparkle:edSignature="T9qHDWQX1DetFWZLOpS5nbeHs03Su/1aUkxq2OVAMvR2mG7udq/kz028aqbsaSSD0vPXKhCaJqs3F9qDkz5gAQ==" length="4256593" type="application/x-apple-diskimage"/>
+        </item>
+        <item>
+            <title>Burrow 0.3.0</title>
+            <pubDate>Tue, 20 Oct 2026 12:40:16 +0000</pubDate>
+            <sparkle:version>3</sparkle:version>
+            <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://cirta.dev/burrow/Burrow-0.3.0.dmg" sparkle:edSignature="zmRK1D9GJK03no222LtwffHQB6jcZnUgw3KXFfB5+hE0pUk4sJFhhzrMXuZOS9LhNBmk8E56dGiiaKx3E4TfCg==" length="4245445" type="application/x-apple-diskimage"/>
+        </item>
+    </channel>
+</rss>
