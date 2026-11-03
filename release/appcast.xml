@@ -7,6 +7,18 @@
         <language>en</language>
         <!-- releases: scripts/release.sh adds the newest below this line -->
         <item>
+            <title>Burrow 0.3.6</title>
+            <pubDate>Tue, 03 Nov 2026 13:47:28 +0000</pubDate>
+            <sparkle:version>9</sparkle:version>
+            <sparkle:shortVersionString>0.3.6</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[<ul>
+<li>Settings explain the setup key and how the code is sent in an ⓘ next to each (hover or click), instead of a long note.</li>
+<li>Clearer example of a password followed by its code.</li>
+</ul>]]></description>
+            <enclosure url="https://github.com/Cirtadev/burrow/releases/download/v0.3.6/Burrow-0.3.6.dmg" sparkle:edSignature="5aB9qMJY+h/FPz6T/oO0MKsnLv/eFlR0qA2laanHuI8+GTMMqp0ezeCP4Cefmd6wAvmd9oAmaRcNru+3KWAdCQ==" length="4793674" type="application/x-apple-diskimage"/>
+        </item>
+        <item>
             <title>Burrow 0.3.5</title>
             <pubDate>Tue, 03 Nov 2026 13:23:09 +0000</pubDate>
             <sparkle:version>8</sparkle:version>
