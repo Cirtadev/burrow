@@ -407,18 +407,20 @@ private struct ProfileEditor: View {
         return networks.isEmpty ? "—" : networks.map(hosts.label).joined(separator: ", ")
     }
 
+    private static let setupKeyHelp = "The setup key is not a 6-digit code: it's the secret your authenticator app got from the QR code when the token was set up. Copy it from the app (1Password, Bitwarden, Authy…), or screenshot the QR code in the VPN portal and use Read QR Code Image. The current code must then match your phone. No key? Choose “Ask me for the code”."
+
     private var otpFooter: String {
         let delivery = summary.staticChallenge != nil
-            ? " The configuration has a static challenge, so the code goes in a field of its own."
+            ? "The configuration has a static challenge, so the code goes in a field of its own."
             : profile.codeDelivery == .appended
-            ? " Burrow sends the code right after the password (password123456), which most servers expect. If yours asks for it in a second step, choose “When the server asks for it”."
-            : " Burrow sends the password alone and the code when the server asks for it (a dynamic challenge or CR_TEXT)."
+            ? "Burrow sends the code right after the password (password123456), which most servers expect. If yours asks for it in a second step, choose “When the server asks for it”."
+            : "Burrow sends the password alone and the code when the server asks for it (a dynamic challenge or CR_TEXT)."
         let web = " If the server uses a sign-in page (SSO), Burrow opens it in your browser."
         switch profile.otpMode {
         case .automatic:
-            return "The setup key is not a 6-digit code: it's the secret your authenticator app got from the QR code when the token was set up. Copy it from the app (1Password, Bitwarden, Authy…), or screenshot the QR code in the VPN portal and use Read QR Code Image. The current code above must match your phone. No key? Choose “Ask me for the code”." + delivery + web
+            return delivery + web
         case .prompt:
-            return "Burrow asks for the code from your authenticator each time it connects, and after a drop." + delivery + web
+            return "Burrow asks for the code from your authenticator each time it connects, and after a drop. " + delivery + web
         case .off:
             return "Burrow sends the username and password only. If the server asks a question (a PIN, an SMS code) or sends you to a sign-in page, Burrow shows it when you connect."
         }
@@ -489,7 +491,15 @@ private struct ProfileEditor: View {
                             Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                         }
                         .font(.callout)
-                        SecureField("Setup key", text: $profile.otpSecret, prompt: Text("Paste the key or otpauth:// link"))
+                        LabeledContent {
+                            SecureField("Setup key", text: $profile.otpSecret, prompt: Text("Paste the key or otpauth:// link"))
+                                .labelsHidden()
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text("Setup key")
+                                InfoButton(text: Self.setupKeyHelp)
+                            }
+                        }
                         HStack {
                             if let qrNote {
                                 Text(qrNote).font(.caption).foregroundStyle(.secondary)
@@ -691,5 +701,26 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 
     func windowWillClose(_ notification: Notification) {
         window = nil
+    }
+}
+
+/// An ⓘ next to a label: its text shows as a tooltip on hover, and in a popover on click.
+struct InfoButton: View {
+    let text: String
+    @State private var shown = false
+
+    var body: some View {
+        Button { shown.toggle() } label: {
+            Image(systemName: "info.circle").foregroundStyle(.secondary)
+        }
+        .buttonStyle(.borderless)
+        .help(text)
+        .accessibilityLabel("More about this")
+        .popover(isPresented: $shown, arrowEdge: .bottom) {
+            Text(text)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(width: 340, alignment: .leading)
+                .padding(16)
+        }
     }
 }

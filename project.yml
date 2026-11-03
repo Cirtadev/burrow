@@ -11,9 +11,9 @@ settings:
     # Day-to-day builds; scripts/release.sh exports the archive with Developer ID instead.
     CODE_SIGN_IDENTITY: Apple Development
     ENABLE_HARDENED_RUNTIME: YES
-    MARKETING_VERSION: 0.3.5
+    MARKETING_VERSION: 0.3.6
     # Sparkle compares this: raise it for every release. scripts/build-app.sh appends a timestamp.
-    CURRENT_PROJECT_VERSION: 8
+    CURRENT_PROJECT_VERSION: 9
     MACOSX_DEPLOYMENT_TARGET: "15.0"
     # The Sparkle feed, the one place it is set (Info.plist SUFeedURL): the newest GitHub release's appcast.xml.
     # Each DMG is downloaded from its own release (.../releases/download/v<version>/); scripts/publish.sh uploads.
