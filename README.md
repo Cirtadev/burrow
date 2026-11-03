@@ -3,6 +3,8 @@
 A menu-bar OpenVPN client for macOS that can type the one-time password for you. OpenVPN 3 runs inside Burrow's
 own network extension: no Tunnelblick, no root helper.
 
+Website: **[burrow.cirta.dev](https://burrow.cirta.dev)**
+
 <p>
   <img src="docs/screenshots/panel-menubar-dark.png" alt="Burrow's panel, connected" width="300">
   <img src="docs/screenshots/sign-in-dark.png" alt="Sign-in window" width="330">

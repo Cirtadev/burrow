@@ -35,6 +35,13 @@ entries keep working. The repository must stay public: Sparkle can't download fr
    It refuses when the source archive contains any of the private patterns listed in
    `scripts/private-patterns.local` (one extended regex per line; that file is never committed nor packed).
 
+## Website
+
+`site/` is the website, [burrow.cirta.dev](https://burrow.cirta.dev) (burrow.cirtadev.com redirects there): plain
+HTML and CSS that `.github/workflows/website.yml` publishes to GitHub Pages whenever `site/` changes on master. Its
+download buttons ask GitHub for the newest release, so a release needs no change there. After a UI change, refresh
+its screenshots with `scripts/build-app.sh` and then `scripts/site-screenshots.sh` (2x, sample data).
+
 ## One-time setup
 
 - **Signing**: the *Developer ID Application: Cirtadev GmbH (GXHYVQ677L)* certificate with its private key in the
@@ -65,6 +72,9 @@ entries keep working. The repository must stay public: Sparkle can't download fr
   The tools are ad-hoc signed, so the first `sign_update` makes macOS ask for access to the key: click
   *Always Allow*.
 - **GitHub**: the `gh` CLI signed in with an account that can create releases in Cirtadev/burrow.
+- **Website**: GitHub Pages of Cirtadev/burrow with *GitHub Actions* as its source and `burrow.cirta.dev` as its
+  custom domain (Enforce HTTPS on). At Cloudflare, `burrow.cirta.dev` is a CNAME to `cirtadev.github.io` (DNS only),
+  and a redirect rule sends `burrow.cirtadev.com` to `https://burrow.cirta.dev` with the path kept.
 
 ## AGPL: source for every release
 

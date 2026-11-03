@@ -19,6 +19,7 @@ struct RoutingSheet: View {
     /// What the running tunnel's last look at the local network found.
     var localDevices: [LocalDevices] = []
     var hosts = HostNames.current()
+    var localNetworks = LocalNetworks.current()
     var onDone: () -> Void
 
     @State private var rows: [RouteChoice] = []
@@ -127,7 +128,7 @@ struct RoutingSheet: View {
         .padding(20)
         .frame(width: 800, height: 460)
         .onAppear {
-            rows = RouteChoices.rows(pushed: serverRoutes, local: LocalNetworks.current(),
+            rows = RouteChoices.rows(pushed: serverRoutes, local: localNetworks,
                                      viaVPN: IPv4Network.parseList(profile.alwaysViaVPN).networks,
                                      alwaysLocal: IPv4Network.parseList(profile.alwaysLocal).networks)
             selection = rows.first(where: \.isClash)?.id

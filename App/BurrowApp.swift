@@ -9,7 +9,8 @@ enum BurrowMain {
         if let index = arguments.firstIndex(of: "--snapshot") {
             let directory = arguments.indices.contains(index + 1)
                 ? arguments[index + 1] : FileManager.default.currentDirectoryPath
-            Snapshot.render(into: directory)
+            let scale = arguments.firstIndex(of: "--scale").flatMap { arguments.indices.contains($0 + 1) ? Double(arguments[$0 + 1]) : nil }
+            Snapshot.render(into: directory, scale: scale ?? 1)
             return
         }
         let app = NSApplication.shared

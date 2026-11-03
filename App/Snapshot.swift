@@ -2,12 +2,16 @@ import AppKit
 import BurrowKit
 import SwiftUI
 
-/// `Burrow --snapshot <dir>` renders Settings and the sign-in window with sample data (no real secrets).
+/// `Burrow --snapshot <dir> [--scale 2]` renders Settings and the sign-in window with sample data (no real secrets).
 /// It draws a real NSHostingView: ImageRenderer cannot draw AppKit-backed controls such as text fields.
 @MainActor
 enum Snapshot {
-    static func render(into directory: String) {
+    /// Pixels per point: 1 for the README, 2 for the website (sharp on Retina screens).
+    private static var scale: CGFloat = 1
+
+    static func render(into directory: String, scale: CGFloat = 1) {
         _ = NSApplication.shared
+        self.scale = scale
         let ovpn = "client\ndev tun\nproto tcp\nremote vpn.example.com 443\nauth-user-pass\n<key>\n…\n</key>\n"
         let office = VPNProfile(name: "office", ovpn: ovpn, username: "alice", password: "example-password",
                                 otpSecret: "JBSWY3DPEHPK3PXP")
@@ -27,7 +31,7 @@ enum Snapshot {
         routed.alwaysViaVPN = "192.168.1.20, 192.168.1.40"
         let serverRoutes = ["192.168.1.0/24", "192.168.40.0/24", "192.168.30.0/24"].compactMap(IPv4Network.init)
         render(RoutingSheet(profile: .constant(routed), serverRoutes: serverRoutes, hosts: HostNames("192.168.1.20 server"),
-                            onDone: {}), to: directory, name: "routing")
+                            localNetworks: [("en0", serverRoutes[0])], onDone: {}), to: directory, name: "routing")
 
         let choices = [PanelState.Choice(id: lab.id, name: "lab", oneClick: false),
                        PanelState.Choice(id: office.id, name: "office", oneClick: true)]
@@ -69,7 +73,7 @@ enum Snapshot {
             window.contentView = hosting
             hosting.layoutSubtreeIfNeeded()
             RunLoop.current.run(until: Date().addingTimeInterval(0.5))
-            guard let content = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) else { continue }
+            let content = bitmap(hosting.bounds.size)
             hosting.cacheDisplay(in: hosting.bounds, to: content)
 
             let menuBar: CGFloat = 30, margin: CGFloat = 24
@@ -118,7 +122,12 @@ enum Snapshot {
                 }
                 return true
             }
-            guard let tiff = image.tiffRepresentation, let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else { continue }
+            let rep = bitmap(canvas)
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+            image.draw(in: NSRect(origin: .zero, size: canvas))
+            NSGraphicsContext.restoreGraphicsState()
+            guard let png = rep.representation(using: .png, properties: [:]) else { continue }
             let url = URL(fileURLWithPath: directory).appendingPathComponent("panel-menubar-\(dark ? "dark" : "light").png")
             try? png.write(to: url)
             print(url.path)
@@ -137,7 +146,7 @@ enum Snapshot {
             hosting.layoutSubtreeIfNeeded()
             RunLoop.current.run(until: Date().addingTimeInterval(0.5))
 
-            guard let rep = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) else { continue }
+            let rep = bitmap(hosting.bounds.size)
             // AppKit controls (the Settings tab bar) draw in the current drawing appearance, not the view's.
             appearance?.performAsCurrentDrawingAppearance { hosting.cacheDisplay(in: hosting.bounds, to: rep) }
             guard let png = rep.representation(using: .png, properties: [:]) else { continue }
@@ -145,5 +154,15 @@ enum Snapshot {
             try? png.write(to: url)
             print(url.path)
         }
+    }
+
+    /// A transparent bitmap of `size` points at `scale` pixels per point.
+    private static func bitmap(_ size: NSSize) -> NSBitmapImageRep {
+        let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int((size.width * scale).rounded(.up)),
+                                   pixelsHigh: Int((size.height * scale).rounded(.up)), bitsPerSample: 8,
+                                   samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB,
+                                   bytesPerRow: 0, bitsPerPixel: 0)!
+        rep.size = size
+        return rep
     }
 }

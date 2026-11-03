@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Burrow · OpenVPN for your Mac's menu bar</title>
+  <meta name="description" content="Burrow is a free, open-source OpenVPN client for macOS. One click connects, with the one-time password typed for you, or asked each time. No Tunnelblick, no root helper.">
+  <link rel="canonical" href="https://burrow.cirta.dev/">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#f4f7fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#070b14" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://burrow.cirta.dev/">
+  <meta property="og:title" content="Burrow · OpenVPN for your Mac's menu bar">
+  <meta property="og:description" content="One click to connect, with the one-time password typed for you. Free and open source.">
+  <meta property="og:image" content="https://burrow.cirta.dev/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    try { const theme = localStorage.getItem("theme"); if (theme) document.documentElement.dataset.theme = theme; } catch {}
+  </script>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10.5 5 5 5-5"/><path d="M5 19.5h14"/></symbol>
+  <symbol id="i-github" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49l-.01-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.85.09-.66.35-1.12.64-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.4 9.4 0 0 1 12 6.84c.85 0 1.71.12 2.51.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9l-.01 2.81c0 .27.18.6.69.49A10.12 10.12 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19 6v5.2c0 4.4-2.9 8.1-7 9.6-4.1-1.5-7-5.2-7-9.6V6z"/><path d="m9 12 2.2 2.2L15.2 10"/></symbol>
+  <symbol id="i-reconnect" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12a7.5 7.5 0 0 1-13.4 4.6"/><path d="M4.5 12a7.5 7.5 0 0 1 13.4-4.6"/><path d="M18.4 3.6v4.2h-4.2"/><path d="M5.6 20.4v-4.2h4.2"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V7.8a3.5 3.5 0 0 1 7 0v2.7"/><path d="M12 14.5v2"/></symbol>
+  <symbol id="i-import" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v10"/><path d="m8 9.5 4 4 4-4"/><path d="M4.5 14.5v3a2.5 2.5 0 0 0 2.5 2.5h10a2.5 2.5 0 0 0 2.5-2.5v-3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19 6v5.2c0 4.4-2.9 8.1-7 9.6-4.1-1.5-7-5.2-7-9.6V6z"/><path d="M12 8.5v4.5"/><circle cx="12" cy="15.8" r=".4" fill="currentColor"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c.6 4.2 2.3 5.9 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.6 5.9-2.3 6.5-6.5Z"/><path d="M18.5 15.5c.25 1.6.9 2.25 2.5 2.5-1.6.25-2.25.9-2.5 2.5-.25-1.6-.9-2.25-2.5-2.5 1.6-.25 2.25-.9 2.5-2.5Z"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8.5 7.5-4.5 4.5 4.5 4.5"/><path d="m15.5 7.5 4.5 4.5-4.5 4.5"/><path d="m13.5 5-3 14"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 18" fill="currentColor"><path d="M12 15.5a1.9 1.9 0 1 1 0 .01Z"/><path d="M12 9.6c1.9 0 3.6.75 4.9 1.95l-1.5 1.55A4.9 4.9 0 0 0 12 11.8c-1.3 0-2.5.5-3.4 1.3L7.1 11.55A7.1 7.1 0 0 1 12 9.6Z"/><path d="M12 4.8c3.2 0 6.1 1.25 8.3 3.3l-1.5 1.55A9.8 9.8 0 0 0 12 7c-2.6 0-5 1-6.8 2.65L3.7 8.1A12 12 0 0 1 12 4.8Z"/><path d="M12 0c4.5 0 8.6 1.75 11.6 4.65l-1.5 1.55A14.5 14.5 0 0 0 12 2.2c-3.9 0-7.5 1.5-10.1 4L.4 4.65A16.7 16.7 0 0 1 12 0Z"/></symbol>
+</svg>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="img/icon.webp" alt="" width="34" height="34">Burrow</a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#codes">One-time passwords</a>
+      <a href="#routing">Routing</a>
+      <a href="#details">Details</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+      <button class="theme-switch" type="button" aria-label="Switch between light and dark"><svg class="sun" aria-hidden="true"><use href="#i-sun"/></svg><svg class="moon" aria-hidden="true"><use href="#i-moon"/></svg></button>
+      <a class="button secondary" href="https://github.com/Cirtadev/burrow"><svg aria-hidden="true"><use href="#i-github"/></svg>GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <h1>OpenVPN for your Mac's menu bar, <span class="accent">code included.</span></h1>
+        <p class="lead">Burrow connects in one click and types the one-time password for you, or asks for it each time.
+          OpenVPN&nbsp;3 runs inside its own network extension: no Tunnelblick, no root helper.</p>
+        <div class="cta">
+          <a class="button primary" data-download href="https://github.com/Cirtadev/burrow/releases/latest"><svg aria-hidden="true"><use href="#i-download"/></svg>Download for Mac</a>
+          <a class="button secondary" href="https://github.com/Cirtadev/burrow"><svg aria-hidden="true"><use href="#i-github"/></svg>View on GitHub</a>
+        </div>
+        <p class="meta"><span data-version></span>Apple silicon and Intel · Notarized by Apple</p>
+      </div>
+      <div class="desktop" role="img" aria-label="Burrow's panel open below its menu bar icon, connected">
+        <div class="bar-items"><span style="width:38px"></span><span style="width:26px"></span><span style="width:30px"></span></div>
+        <div class="hang">
+          <picture>
+            <source srcset="img/panel-dark.webp" media="(prefers-color-scheme: dark)">
+            <img src="img/panel-light.webp" width="348" height="493" alt="">
+          </picture>
+          <div class="clock"><svg><use href="#i-wifi"/></svg>Tue 9:41</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="codes">
+    <div class="wrap">
+      <div class="story">
+        <div class="copy">
+          <span class="eyebrow">One-time passwords</span>
+          <h2>The code, typed for you</h2>
+          <p>Give Burrow your authenticator's setup key, or a picture of its QR code, and it computes the same six digits as
+            your phone. One click on the power button sends your password and the current code together.</p>
+          <p>Every sign-in gets a fresh code. A code is never sent twice: with less than three seconds left, Burrow
+            waits for the next one and counts down. If the server says no, it tries once more, then stops, so a typo
+            can't lock your account.</p>
+          <div class="note"><svg aria-hidden="true"><use href="#i-check"/></svg>
+            <span>Rather keep two real factors? Choose <em>Ask me for the code</em>: a small window takes the code
+              from your phone. It's the recommended mode, and the one new configurations start with.</span></div>
+        </div>
+        <div class="media code">
+          <picture>
+            <source srcset="img/settings-dark.webp" media="(prefers-color-scheme: dark)">
+            <img class="shot" src="img/settings-light.webp" width="760" height="640" alt="Burrow's settings for a configuration: account, one-time password mode and setup key" loading="lazy">
+          </picture>
+          <picture>
+            <source srcset="img/sign-in-dark.webp" media="(prefers-color-scheme: dark)">
+            <img class="shot front" src="img/sign-in-light.webp" width="380" height="205" alt="The sign-in window asking for the one-time password" loading="lazy">
+          </picture>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="routing">
+    <div class="wrap">
+      <div class="story flip">
+        <div class="copy">
+          <span class="eyebrow">Routing</span>
+          <h2>Same addresses at home and at the office? Fine.</h2>
+          <p>When your Wi-Fi at home uses <code>192.168.1.x</code> and so does the office behind the VPN, macOS sends
+            it all to your router and the company servers disappear. Burrow spots the clash, finds the devices on your
+            own network, keeps those local and sends every other address of the range through the VPN.</p>
+          <p>It looks again every ten minutes and whenever you change networks. Want a server always through the
+            tunnel, or a range always local? Tick it in <em>Choose Routes…</em>, by address or by name.</p>
+        </div>
+        <div class="media">
+          <picture>
+            <source srcset="img/routing-dark.webp" media="(prefers-color-scheme: dark)">
+            <img class="shot" src="img/routing-light.webp" width="800" height="460" alt="The routes table: a range shared with the Wi-Fi network set to Auto, VPN routes and servers added by name" loading="lazy">
+          </picture>
+        </div>
+      </div>
+
+      <div class="story" id="sign-in">
+        <div class="copy">
+          <span class="eyebrow">Sign-in</span>
+          <h2>Works the way your VPN signs in</h2>
+          <p>Burrow runs OpenVPN&nbsp;3 in its own network extension and handles the sign-ins it offers, from a plain
+            password to a page in your browser.</p>
+          <ul class="chips">
+            <li>Username and password</li>
+            <li>Password + one-time code</li>
+            <li>Certificate</li>
+            <li>Encrypted private key</li>
+            <li>Static challenge</li>
+            <li>Dynamic challenge (SMS, RADIUS)</li>
+            <li>Web sign-in (SSO)</li>
+            <li>PKCS#12 certificate</li>
+            <li>HTTP proxy login</li>
+            <li>Session tokens</li>
+          </ul>
+          <p class="small">Not supported: certificates on a smart card or in the macOS keychain (PKCS#11), and
+            static-key configurations, which OpenVPN&nbsp;3 dropped.</p>
+        </div>
+        <div class="media signin">
+          <picture>
+            <source srcset="img/web-sign-in-dark.webp" media="(prefers-color-scheme: dark)">
+            <img class="shot panel" src="img/web-sign-in-light.webp" width="300" height="449" alt="The panel waiting for a sign-in in the browser" loading="lazy">
+          </picture>
+          <picture>
+            <source srcset="img/challenge-dark.webp" media="(prefers-color-scheme: dark)">
+            <img class="shot front" src="img/challenge-light.webp" width="380" height="181" alt="A server question: enter the code sent by SMS" loading="lazy">
+          </picture>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="details">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Details</span>
+        <h2>Made to stay out of your way</h2>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="icon"><svg aria-hidden="true"><use href="#i-reconnect"/></svg></div>
+          <h3>Reconnects by itself</h3>
+          <p>After sleep, a network change or a server restart, a 1-click configuration signs in again with a fresh
+            code. The others ask you with a notification.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg aria-hidden="true"><use href="#i-lock"/></svg></div>
+          <h3>Secrets stay in the keychain</h3>
+          <p>Passwords, keys and setup keys are keychain items. The tunnel holds them in memory only: never on disk,
+            never in a log.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg aria-hidden="true"><use href="#i-import"/></svg></div>
+          <h3>Moves over from Tunnelblick</h3>
+          <p>Imports your Tunnelblick configurations with their saved logins, or any <code>.ovpn</code> file with the
+            certificates and keys next to it.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg aria-hidden="true"><use href="#i-shield"/></svg></div>
+          <h3>No root helper</h3>
+          <p>The tunnel is Burrow's own network extension, which you allow once in System Settings. No kernel
+            extension, no privileged helper tool.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg aria-hidden="true"><use href="#i-sparkle"/></svg></div>
+          <h3>Signed, notarized, up to date</h3>
+          <p>Notarized by Apple. Updates are checked against their signatures before Sparkle installs them.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><svg aria-hidden="true"><use href="#i-code"/></svg></div>
+          <h3>Open source</h3>
+          <p>Licensed under the AGPL-3.0, with the complete source code published next to every release.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Install</span>
+        <h2>Connected in a couple of minutes</h2>
+      </div>
+      <ol class="steps">
+        <li>
+          <h3>Download</h3>
+          <p>Open the disk image and drag Burrow to your Applications folder.</p>
+        </li>
+        <li>
+          <h3>Allow the VPN</h3>
+          <p>On first launch, turn Burrow on in System Settings › General › Login Items &amp; Extensions.</p>
+        </li>
+        <li>
+          <h3>Add your VPN</h3>
+          <p>Import from Tunnelblick or open the <code>.ovpn</code> file from your company, then click the power
+            button.</p>
+        </li>
+      </ol>
+      <div class="install-cta">
+        <a class="button primary" data-download href="https://github.com/Cirtadev/burrow/releases/latest"><svg aria-hidden="true"><use href="#i-download"/></svg>Download for Mac</a>
+        <p class="meta"><span data-version></span>macOS 15 or later · Apple silicon and Intel ·
+          <a href="https://github.com/Cirtadev/burrow/blob/master/docs/GUIDE.md">User guide</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">FAQ</span>
+        <h2>Questions</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Is it safe to let Burrow generate the code?</summary>
+          <p>It's convenient, but it isn't two-factor any more: the setup key sits on your Mac next to your password,
+            so anyone using your unlocked Mac can connect. Use it only on a Mac you alone use, with FileVault on, and
+            check that your VPN's policy allows it. Otherwise choose <em>Ask me for the code</em>.</p>
+        </details>
+        <details>
+          <summary>Which VPNs does it work with?</summary>
+          <p>Any OpenVPN server you connect to with an <code>.ovpn</code> configuration, over TLS 1.2 or later.
+            Burrow doesn't support certificates on a smart card (PKCS#11) or static-key configurations.</p>
+        </details>
+        <details>
+          <summary>Do I still need Tunnelblick?</summary>
+          <p>No. Burrow imports its configurations and works without it. Quit Tunnelblick before you connect with
+            Burrow: two tunnels with the same routes get in each other's way.</p>
+        </details>
+        <details>
+          <summary>Why isn't it in the Mac App Store?</summary>
+          <p>OpenVPN&nbsp;3 is licensed under the AGPL, which doesn't fit the App Store's terms. Burrow is signed with
+            Developer ID and notarized by Apple instead.</p>
+        </details>
+        <details>
+          <summary>How do updates work?</summary>
+          <p>Choose <em>Check for Updates…</em> in the panel, or let Burrow check automatically. It downloads the new
+            version, verifies its signatures, replaces itself and relaunches. The VPN drops for a moment while it
+            restarts.</p>
+        </details>
+        <details>
+          <summary>Where do my passwords go?</summary>
+          <p>Into your Mac's keychain, unless you'd rather type them each time. Burrow has no account, no server of
+            its own and no analytics: it talks to your VPN, and to GitHub when it checks for updates.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="img/icon.webp" alt="" width="34" height="34">Burrow</a>
+    <nav class="links" aria-label="Links">
+      <a href="https://github.com/Cirtadev/burrow">GitHub</a>
+      <a href="https://github.com/Cirtadev/burrow/releases">Releases</a>
+      <a href="https://github.com/Cirtadev/burrow/blob/master/docs/GUIDE.md">User guide</a>
+      <a href="https://github.com/Cirtadev/burrow/blob/master/LICENSE">License</a>
+      <a href="https://cirtadev.com">Cirtadev</a>
+    </nav>
+    <p class="legal">© 2026 Cirtadev GmbH. OpenVPN is a registered trademark of OpenVPN Inc. Burrow is not affiliated
+      with Tunnelblick or OpenVPN Inc.</p>
+  </div>
+</footer>
+
+<script>
+  // Light or dark: the Mac's appearance until the visitor flips the switch. The screenshots follow, since their
+  // <source> elements only match the dark media query.
+  const root = document.documentElement;
+  const system = matchMedia("(prefers-color-scheme: dark)");
+  const isDark = () => (root.dataset.theme ? root.dataset.theme === "dark" : system.matches);
+  function applyTheme() {
+    const theme = root.dataset.theme;
+    document.querySelectorAll("picture source").forEach((source) => {
+      source.media = theme ? (theme === "dark" ? "all" : "not all") : "(prefers-color-scheme: dark)";
+    });
+    document.querySelector(".theme-switch").title = isDark() ? "Light appearance" : "Dark appearance";
+  }
+  document.querySelector(".theme-switch").addEventListener("click", () => {
+    const dark = !isDark();
+    if (dark === system.matches) delete root.dataset.theme; else root.dataset.theme = dark ? "dark" : "light";
+    try { root.dataset.theme ? localStorage.setItem("theme", root.dataset.theme) : localStorage.removeItem("theme"); } catch {}
+    applyTheme();
+  });
+  system.addEventListener("change", applyTheme);
+  applyTheme();
+
+  // Point the download buttons at the newest disk image; without the API they open the latest release page.
+  fetch("https://api.github.com/repos/Cirtadev/burrow/releases/latest")
+    .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
+    .then((release) => {
+      const dmg = release.assets.find((asset) => asset.name.endsWith(".dmg"));
+      if (!dmg) return;
+      const version = release.tag_name.replace(/^v/, "");
+      const size = (dmg.size / 1e6).toFixed(1);
+      document.querySelectorAll("[data-download]").forEach((link) => (link.href = dmg.browser_download_url));
+      document.querySelectorAll("[data-version]").forEach((el) => (el.textContent = `Version ${version} · ${size} MB · `));
+    })
+    .catch(() => {});
+</script>
+</body>
+</html>
