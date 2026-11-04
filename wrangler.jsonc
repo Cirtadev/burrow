@@ -8,8 +8,8 @@
     "directory": "./site",
     "not_found_handling": "404-page"
   },
-  // As set on the dashboard, so a deploy doesn't change it.
+  // Workers Logs and metrics on the dashboard.
   "observability": {
-    "enabled": false
+    "enabled": true
   }
 }
