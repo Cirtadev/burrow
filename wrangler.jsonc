@@ -3,7 +3,10 @@
 // Its custom domain, burrow.cirta.dev, is attached in the dashboard.
 {
   "name": "burrow",
-  "compatibility_date": "2026-10-01",
+  "compatibility_date": "2026-11-04",
+  // Only burrow.cirta.dev: no workers.dev address, no preview addresses.
+  "workers_dev": false,
+  "preview_urls": false,
   "assets": {
     "directory": "./site",
     "not_found_handling": "404-page"
