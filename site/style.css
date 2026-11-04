@@ -124,7 +124,7 @@ code { font: 0.88em ui-monospace, "SF Mono", Menlo, monospace; }
 .brand { display: flex; align-items: center; gap: 9px; color: var(--text); font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
 .brand:hover { text-decoration: none; }
 .brand img { width: 34px; height: 34px; margin: -3px; }
-.nav-links { display: flex; gap: 24px; margin-left: auto; font-size: 15px; }
+.nav-links { display: flex; align-items: center; gap: 24px; margin-left: auto; font-size: 15px; }
 .nav-links a { color: var(--muted); }
 .nav-links a:hover { color: var(--text); text-decoration: none; }
 .nav .button { padding: 7px 14px; font-size: 14px; }
