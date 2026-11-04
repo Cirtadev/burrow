@@ -19,13 +19,11 @@
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="style.css">
-  <script>
-    try { const theme = localStorage.getItem("theme"); if (theme) document.documentElement.dataset.theme = theme; } catch {}
-  </script>
+  <script src="theme.js"></script>
 </head>
 <body>
 
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<svg class="sprites" width="0" height="0" aria-hidden="true">
   <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10.5 5 5 5-5"/><path d="M5 19.5h14"/></symbol>
   <symbol id="i-github" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49l-.01-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.85.09-.66.35-1.12.64-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.4 9.4 0 0 1 12 6.84c.85 0 1.71.12 2.51.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9l-.01 2.81c0 .27.18.6.69.49A10.12 10.12 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 19 6v5.2c0 4.4-2.9 8.1-7 9.6-4.1-1.5-7-5.2-7-9.6V6z"/><path d="m9 12 2.2 2.2L15.2 10"/></symbol>
@@ -70,7 +68,7 @@
         <p class="meta"><span data-version></span>Apple silicon and Intel · Notarized by Apple</p>
       </div>
       <div class="desktop" role="img" aria-label="Burrow's panel open below its menu bar icon, connected">
-        <div class="bar-items"><span style="width:38px"></span><span style="width:26px"></span><span style="width:30px"></span></div>
+        <div class="bar-items"><span></span><span></span><span></span></div>
         <div class="hang">
           <picture>
             <source srcset="img/panel-dark.webp" media="(prefers-color-scheme: dark)">
@@ -300,40 +298,6 @@
   </div>
 </footer>
 
-<script>
-  // Light or dark: the Mac's appearance until the visitor flips the switch. The screenshots follow, since their
-  // <source> elements only match the dark media query.
-  const root = document.documentElement;
-  const system = matchMedia("(prefers-color-scheme: dark)");
-  const isDark = () => (root.dataset.theme ? root.dataset.theme === "dark" : system.matches);
-  function applyTheme() {
-    const theme = root.dataset.theme;
-    document.querySelectorAll("picture source").forEach((source) => {
-      source.media = theme ? (theme === "dark" ? "all" : "not all") : "(prefers-color-scheme: dark)";
-    });
-    document.querySelector(".theme-switch").title = isDark() ? "Light appearance" : "Dark appearance";
-  }
-  document.querySelector(".theme-switch").addEventListener("click", () => {
-    const dark = !isDark();
-    if (dark === system.matches) delete root.dataset.theme; else root.dataset.theme = dark ? "dark" : "light";
-    try { root.dataset.theme ? localStorage.setItem("theme", root.dataset.theme) : localStorage.removeItem("theme"); } catch {}
-    applyTheme();
-  });
-  system.addEventListener("change", applyTheme);
-  applyTheme();
-
-  // Point the download buttons at the newest disk image; without the API they open the latest release page.
-  fetch("https://api.github.com/repos/Cirtadev/burrow/releases/latest")
-    .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
-    .then((release) => {
-      const dmg = release.assets.find((asset) => asset.name.endsWith(".dmg"));
-      if (!dmg) return;
-      const version = release.tag_name.replace(/^v/, "");
-      const size = (dmg.size / 1e6).toFixed(1);
-      document.querySelectorAll("[data-download]").forEach((link) => (link.href = dmg.browser_download_url));
-      document.querySelectorAll("[data-version]").forEach((el) => (el.textContent = `Version ${version} · ${size} MB · `));
-    })
-    .catch(() => {});
-</script>
+<script src="main.js"></script>
 </body>
 </html>

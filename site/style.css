@@ -101,6 +101,7 @@ body {
 }
 
 img { display: block; max-width: 100%; height: auto; }
+.sprites { position: absolute; }
 a { color: var(--accent-text); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
 em { font-style: normal; font-weight: 600; color: var(--text); }
@@ -206,6 +207,9 @@ h1 .accent { background: var(--brand); -webkit-background-clip: text; background
 }
 .desktop .bar-items { position: absolute; inset: 0 auto auto 18px; height: calc(var(--w) * 30 / 348); display: flex; align-items: center; gap: 14px; }
 .desktop .bar-items span { display: block; height: 7px; border-radius: 4px; background: var(--menubar-ink); opacity: 0.3; }
+.desktop .bar-items span:nth-child(1) { width: 38px; }
+.desktop .bar-items span:nth-child(2) { width: 26px; }
+.desktop .bar-items span:nth-child(3) { width: 30px; }
 .desktop .hang { position: relative; width: var(--w); margin-left: auto; margin-right: 40px; }
 .desktop .clock {
   position: absolute;
@@ -375,3 +379,9 @@ footer .legal { grid-column: 1 / -1; margin: 12px 0 0; }
   html { scroll-behavior: auto; }
   .button { transition: none; }
 }
+
+/* 404 */
+
+.lost { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 32px 16px; text-align: center; }
+.lost h1 { font-size: clamp(2rem, 5vw, 3rem); }
+.lost p { margin: 0 0 12px; color: var(--muted); font-size: 1.12rem; }
