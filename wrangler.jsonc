@@ -7,5 +7,9 @@
   "assets": {
     "directory": "./site",
     "not_found_handling": "404-page"
+  },
+  // As set on the dashboard, so a deploy doesn't change it.
+  "observability": {
+    "enabled": false
   }
 }
