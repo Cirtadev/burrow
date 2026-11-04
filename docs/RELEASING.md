@@ -37,7 +37,7 @@ entries keep working. The repository must stay public: Sparkle can't download fr
 
 ## Website
 
-`site/` is the website, [burrow.cirta.dev](https://burrow.cirta.dev) (also burrow.cirtadev.com): plain HTML, CSS and
+`site/` is the website, [burrow.cirta.dev](https://burrow.cirta.dev): plain HTML, CSS and
 JavaScript, served by Cloudflare as a Worker with static assets (`wrangler.jsonc`), which Workers Builds deploys
 whenever `site/` changes on master. `site/_headers` sets
 its security headers (a strict Content-Security-Policy: only its own files, plus the GitHub API), `site/404.html` is
@@ -77,8 +77,8 @@ sample data).
 - **GitHub**: the `gh` CLI signed in with an account that can create releases in Cirtadev/burrow.
 - **Website**: the Cloudflare Worker `burrow` connected to Cirtadev/burrow (Workers Builds: branch `master`, no build
   command, deploy command `npx wrangler deploy`, build watch paths `site/*` and `wrangler.jsonc`), with
-  `burrow.cirta.dev` and `burrow.cirtadev.com` as custom domains (Settings › Domains & Routes; Cloudflare adds their
-  DNS records and certificates, both zones being in the same account).
+  `burrow.cirta.dev` as its custom domain (Settings › Domains & Routes; Cloudflare adds its DNS record and
+  certificate, the zone being in the same account).
 
 ## AGPL: source for every release
 
