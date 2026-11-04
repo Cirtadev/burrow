@@ -13,3 +13,6 @@ build-*.log
 
 # The leak check's private patterns (scripts/publish.sh).
 /scripts/private-patterns.local
+
+# Wrangler's local state (npx wrangler deploy).
+/.wrangler/

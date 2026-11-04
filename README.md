@@ -6,11 +6,11 @@ own network extension: no Tunnelblick, no root helper.
 Website: **[burrow.cirta.dev](https://burrow.cirta.dev)**
 
 <p>
-  <img src="docs/screenshots/panel-menubar-dark.png" alt="Burrow's panel, connected" width="300">
-  <img src="docs/screenshots/sign-in-dark.png" alt="Sign-in window" width="330">
+  <img src="docs/screenshots/panel-menubar-dark.webp" alt="Burrow's panel, connected" width="300">
+  <img src="docs/screenshots/sign-in-dark.webp" alt="Sign-in window" width="330">
 </p>
 
-![Settings](docs/screenshots/settings-dark.png)
+![Settings](docs/screenshots/settings-dark.webp)
 
 - One click to connect, with the code generated from your authenticator's setup key, or asked each time
 - Password, certificate, encrypted key, challenges, web sign-in (SSO), PKCS#12 and proxy logins
@@ -18,7 +18,7 @@ Website: **[burrow.cirta.dev](https://burrow.cirta.dev)**
 - Imports Tunnelblick configurations and `.ovpn` files; passwords and keys go in the keychain
 - Notarized, updates itself (Sparkle)
 
-![Routing](docs/screenshots/routing-dark.png)
+![Routing](docs/screenshots/routing-dark.webp)
 
 ## Install
 

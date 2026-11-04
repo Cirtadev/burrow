@@ -42,8 +42,8 @@ JavaScript, served by Cloudflare as a Worker with static assets (`wrangler.jsonc
 whenever `site/` changes on master. `site/_headers` sets
 its security headers (a strict Content-Security-Policy: only its own files, plus the GitHub API), `site/404.html` is
 its not-found page. Its download buttons ask GitHub for the newest release, so a release needs no change there.
-After a UI change, refresh its screenshots with `scripts/build-app.sh` and then `scripts/site-screenshots.sh` (2x,
-sample data).
+After a UI change, refresh its screenshots and the README's with `scripts/build-app.sh` and then
+`scripts/screenshots.sh` (sample data, WebP).
 
 ## One-time setup
 

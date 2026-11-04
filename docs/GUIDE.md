@@ -72,7 +72,7 @@ Each configuration has:
 
 Disconnect and quit Tunnelblick before connecting: two tunnels with the same routes conflict.
 
-![Sign-in](screenshots/sign-in-dark.png)
+![Sign-in](screenshots/sign-in-dark.webp)
 
 ## Using it
 
@@ -82,7 +82,7 @@ Disconnect and quit Tunnelblick before connecting: two tunnels with the same rou
   traffic, the current OTP code (click to copy), *Settings…*, *Show Log*, *Check for Updates…* and *Quit*.
   **Right-click** (or Control/Option-click) gives the same as a compact menu.
 
-![Panel](screenshots/panel-menubar-dark.png)
+![Panel](screenshots/panel-menubar-dark.webp)
 
 - Icon: outline shield = off, half-filled blinking = connecting, filled lock shield = connected,
   exclamation shield = failed (the menu says why).
@@ -143,7 +143,7 @@ own entries, with **Auto** (shared ranges only), **VPN** and **Local** boxes. Ad
 name (`192.168.1.20 server`), and you can add a server by name: Burrow stores the addresses it resolves to. VPN
 entries win over the local network; Local entries become excluded routes. Changes apply at once to a running tunnel.
 
-![Routing](screenshots/routing-dark.png)
+![Routing](screenshots/routing-dark.webp)
 
 ## Security notes
 
@@ -187,7 +187,7 @@ The first build compiles OpenVPN 3 and mbedTLS (about 8 minutes) and lets Xcode 
 cd BurrowKit && swift test                         # TOTP, scheduler, .ovpn reader, routing, protocol tests
 build/burrowctl otp <secret>                       # print the current code
 build/burrowctl ovpn ~/Downloads/<file>.ovpn       # summarize a config (never prints keys)
-build/Burrow.app/Contents/MacOS/Burrow --snapshot docs/screenshots   # render the screenshots with sample data
+scripts/screenshots.sh                             # render the screenshots with sample data
 systemextensionsctl list                           # is the tunnel extension active?
 /usr/bin/log stream --info --predicate 'subsystem == "dev.cirta.burrow.tunnel"'   # tunnel log
 ```
