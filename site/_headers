@@ -1,4 +1,4 @@
-# Cloudflare Pages response headers (https://developers.cloudflare.com/pages/configuration/headers/).
+# Response headers of the site's static assets (https://developers.cloudflare.com/workers/static-assets/headers/).
 # The page loads only its own files; the one outside call is the GitHub API for the newest release (main.js).
 /*
   Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src https://api.github.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
@@ -9,8 +9,3 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()
   Cross-Origin-Opener-Policy: same-origin
 
-# The project's own pages.dev addresses stay out of search results: burrow.cirta.dev is the site.
-https://:project.pages.dev/*
-  X-Robots-Tag: noindex
-https://:version.:project.pages.dev/*
-  X-Robots-Tag: noindex

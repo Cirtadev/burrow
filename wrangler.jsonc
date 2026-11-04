@@ -1,0 +1,11 @@
+// The website (site/) as a Cloudflare Worker with static assets only; Workers Builds deploys it from master
+// with `npx wrangler deploy`. site/_headers sets its headers, site/404.html answers unknown paths.
+// Custom domains (burrow.cirta.dev, burrow.cirtadev.com) are attached in the dashboard.
+{
+  "name": "burrow",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./site",
+    "not_found_handling": "404-page"
+  }
+}
