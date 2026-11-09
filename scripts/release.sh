@@ -205,8 +205,9 @@ step "Packing the corresponding source (AGPL)"
 SRC_NAME=Burrow-$VERSION-source
 mkdir -p "$OUT/$SRC_NAME/third_party"
 # re/ holds third-party binaries and their analysis: never part of a release; private-patterns.local lists the
-# owner's private details for publish.sh's check, so it must not ship either.
-rsync -a --exclude /build --exclude /re --exclude /scripts/private-patterns.local --exclude .build --exclude .swiftpm --exclude '*.xcodeproj' \
+# owner's private details for publish.sh's check, so it must not ship either. Whatever git ignores (.wrangler/
+# with the Cloudflare account, build output) stays out too.
+rsync -a --filter=':- .gitignore' --exclude /build --exclude /re --exclude /scripts/private-patterns.local --exclude .build --exclude .swiftpm --exclude '*.xcodeproj' \
     --exclude DerivedData --exclude .DS_Store --exclude 'build-*.log' --exclude .git ./ "$OUT/$SRC_NAME/"
 # OpenVPNAdapter (with OpenVPN 3 Core) is already in ThirdParty/, with Burrow's change listed in BURROW-CHANGES.md.
 for package in Sparkle; do
