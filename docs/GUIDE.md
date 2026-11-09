@@ -161,7 +161,10 @@ entries win over the local network; Local entries become excluded routes. Change
   connect. Check that this fits the VPN owner's policy.
 - The tunnel runs OpenVPN 3 Core 3.11.8 with Mbed TLS 3.6.7 LTS (TLS 1.2 and 1.3), vendored in
   `ThirdParty/OpenVPNAdapter` ([what Burrow changed](../ThirdParty/OpenVPNAdapter/BURROW-CHANGES.md)). Mbed TLS 3.6
-  is maintained until March 2027; OpenVPN 3 doesn't support Mbed TLS 4 yet.
+  is maintained until March 2027; OpenVPN 3 doesn't support Mbed TLS 4 yet. OpenVPN 3 refuses OpenVPN 2 directives
+  it doesn't use, so the tunnel gets a copy of the configuration without the harmless ones (log and status files,
+  management, …; its log lists them) and with `remote-cert-tls server` for `ns-cert-type server`; a few it can't
+  drop safely (`socks-proxy`, `fragment`, `verify-hash`, …) make the configuration unusable with an explanation.
 
 ## Development
 

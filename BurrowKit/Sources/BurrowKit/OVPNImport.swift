@@ -197,6 +197,11 @@ public enum PKCS12 {
 /// The `.ovpn` text the tunnel hands to OpenVPN 3.
 public enum TunnelConfig {
     public static func ovpn(for profile: VPNProfile) -> String {
+        prepared(for: profile).ovpn
+    }
+
+    /// The configuration the tunnel hands to OpenVPN 3, and what Burrow changed in it (for the tunnel's log).
+    public static func prepared(for profile: VPNProfile) -> (ovpn: String, notes: [String]) {
         let summary = profile.summary
         var lines = profile.ovpn.components(separatedBy: "\n")
         if summary.staticChallengeConcat {
@@ -208,6 +213,7 @@ public enum TunnelConfig {
             lines += ["<http-proxy-user-pass>", clean(profile.proxyUsername), clean(profile.proxyPassword),
                       "</http-proxy-user-pass>"]
         }
-        return lines.joined(separator: "\n")
+        let adapted = OpenVPN3Options.adapt(lines)
+        return (adapted.lines.joined(separator: "\n"), adapted.notes)
     }
 }

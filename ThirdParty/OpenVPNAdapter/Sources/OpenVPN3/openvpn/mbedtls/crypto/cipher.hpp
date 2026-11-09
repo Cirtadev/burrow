@@ -158,6 +158,13 @@ class CipherContext
         if (mbedtls_cipher_setup(&ctx, ci) < 0)
             throw mbedtls_cipher_error("mbedtls_cipher_setup");
 
+        // Burrow (Cirtadev GmbH, 2026-11-09): since Mbed TLS 3.5, CBC needs an explicit padding mode;
+        // without one every mbedtls_cipher_finish() fails and the CBC data channel carries nothing.
+        // OpenVPN's CBC uses PKCS#7 padding (the default of Mbed TLS 2 and OpenSSL).
+        if (mbedtls_cipher_get_cipher_mode(&ctx) == MBEDTLS_MODE_CBC
+            && mbedtls_cipher_set_padding_mode(&ctx, MBEDTLS_PADDING_PKCS7) < 0)
+            throw mbedtls_cipher_error("mbedtls_cipher_set_padding_mode");
+
         // set key and encrypt/decrypt mode
         if (mbedtls_cipher_setkey(&ctx, key, mbedtls_cipher_get_key_bitlen(&ctx), (mbedtls_operation_t)mode) < 0)
             throw mbedtls_cipher_error("mbedtls_cipher_setkey");

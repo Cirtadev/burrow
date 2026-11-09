@@ -38,6 +38,8 @@ final class PacketTunnelProvider: NEPacketTunnelProvider, OpenVPNAdapterDelegate
     private var restarting = false
     private var everConnected = false
     private var authFailures = 0
+    /// Burrow checks the server certificate with remote-cert-tls instead of the configuration's ns-cert-type.
+    private var nsCertTypeReplaced = false
     private var pendingError: NSError?
     private var phase = "Starting…"
     private var recentLog: [String] = []
@@ -222,7 +224,14 @@ final class PacketTunnelProvider: NEPacketTunnelProvider, OpenVPNAdapterDelegate
         self.adapter = adapter
 
         let configuration = OpenVPNConfiguration()
-        configuration.fileContent = Data(TunnelConfig.ovpn(for: profile).utf8)
+        // OpenVPN 3.11 refuses OpenVPN 2 directives it doesn't use: Burrow leaves out the harmless ones.
+        let prepared = TunnelConfig.prepared(for: profile)
+        nsCertTypeReplaced = prepared.notes.contains { $0.hasPrefix("ns-cert-type") }
+        for note in prepared.notes {
+            log.info("configuration: \(note, privacy: .public)")
+            appendLog("configuration: \(note)")
+        }
+        configuration.fileContent = Data(prepared.ovpn.utf8)
         configuration.tunPersist = true
         let info = Bundle.main.infoDictionary
         configuration.guiVersion = "Burrow \(info?["CFBundleShortVersionString"] as? String ?? "?") (Cirtadev GmbH)"
@@ -236,6 +245,10 @@ final class PacketTunnelProvider: NEPacketTunnelProvider, OpenVPNAdapterDelegate
         // Pushed DOMAIN options stay search domains (as with OpenVPN 3.6); the DNS settings below decide
         // what goes to the VPN's DNS servers.
         configuration.dhcpSearchDomainsAsSplitDomains = false
+        // OpenVPN 3.11 drops the session when a profile or server uses compression framing (comp-lzo,
+        // compress, a pushed compressor) unless compression is allowed. Asymmetric, as OpenVPN 2.6's default
+        // and as OpenVPN 3.6 did: decompress what the server sends, never compress what Burrow sends.
+        configuration.compressionMode = .asym
         if !profile.keyPassphrase.isEmpty { configuration.privateKeyPassword = profile.keyPassphrase }
         do {
             let evaluation = try adapter.apply(configuration: configuration)
@@ -537,7 +550,12 @@ final class PacketTunnelProvider: NEPacketTunnelProvider, OpenVPNAdapterDelegate
                 return
             }
 
-            if nsError.code == OpenVPNAdapterError.pemPasswordFail.rawValue {
+            if nsError.code == OpenVPNAdapterError.certVerifyFail.rawValue, self.nsCertTypeReplaced {
+                self.pendingError = TunnelFailure.error(TunnelFailure.connectionFailed,
+                    "The server's certificate has no TLS server key usage. OpenVPN 3 no longer supports the "
+                    + "configuration's “ns-cert-type server”, so Burrow checks “remote-cert-tls server”, which needs "
+                    + "it. The server's certificate must be reissued with the TLS Web Server Authentication usage.")
+            } else if nsError.code == OpenVPNAdapterError.pemPasswordFail.rawValue {
                 self.pendingError = TunnelFailure.error(TunnelFailure.passphraseNeeded,
                     "The private key's passphrase is wrong.")
             } else if nsError.code == OpenVPNAdapterError.authFailed.rawValue {
@@ -561,6 +579,16 @@ final class PacketTunnelProvider: NEPacketTunnelProvider, OpenVPNAdapterDelegate
                 // saved password (a web page, a CR_TEXT answer, a typed code). Start over like a new connection.
                 self.restart("the server's session expired")
                 return
+            } else if nsError.code == OpenVPNAdapterError.unusedOptionsError.rawValue {
+                // OpenVPN's message lists them by kind ("UNKNOWN/UNSUPPORTED OPTIONS: a,b").
+                let options = message.split(whereSeparator: \.isNewline).joined(separator: "; ")
+                self.pendingError = TunnelFailure.error(TunnelFailure.configurationInvalid,
+                    "OpenVPN 3 can't use some options in this configuration (\(options)). Remove them from the .ovpn "
+                    + "file and import it again.")
+            } else if nsError.code == OpenVPNAdapterError.ntlmMissingCrypto.rawValue {
+                self.pendingError = TunnelFailure.error(TunnelFailure.notConfigured,
+                    "The HTTP proxy only accepts an NTLM login, which Burrow can't do. Ask for Digest or Basic "
+                    + "login on the proxy, or connect without it.")
             } else if nsError.code == OpenVPNAdapterError.proxyNeedCreds.rawValue {
                 self.pendingError = TunnelFailure.error(TunnelFailure.notConfigured,
                     "The HTTP proxy asks for a login: enter its username and password in Settings.")
@@ -575,7 +603,19 @@ final class PacketTunnelProvider: NEPacketTunnelProvider, OpenVPNAdapterDelegate
     func openVPNAdapter(_ openVPNAdapter: OpenVPNAdapter, handleLogMessage logMessage: String) {
         let line = logMessage.trimmingCharacters(in: .whitespacesAndNewlines)
         log.debug("\(line, privacy: .public)")
-        queue.async { self.appendLog(line) }
+        queue.async {
+            self.appendLog(line)
+            // OpenVPN 3 restarts forever, without an error event, when it can't set up the data cipher the server
+            // chose: stop with the reason instead.
+            if let cipher = OpenVPN3Options.unusableCipher(inLogLine: line), openVPNAdapter === self.adapter,
+               !self.stopping, !self.endedAdapters.contains(ObjectIdentifier(openVPNAdapter)) {
+                self.log.error("the server's data cipher \(cipher, privacy: .public) is not available")
+                self.giveUp(TunnelFailure.error(TunnelFailure.connectionFailed,
+                    "The server uses the \(cipher) cipher, which Burrow's VPN engine (OpenVPN 3 with Mbed TLS 3) "
+                    + "doesn't support. The server must offer AES-GCM or AES-CBC (its data-ciphers or cipher "
+                    + "setting)."))
+            }
+        }
     }
 
     // MARK: - Helpers

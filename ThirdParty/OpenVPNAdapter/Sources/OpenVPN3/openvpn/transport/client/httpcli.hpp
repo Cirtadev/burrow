@@ -635,7 +635,9 @@ class Client : public TransportClient, AsyncResolvableTCP
                 if (method == Any || method == Ntlm)
                 {
                     pa = get_proxy_authenticate_header("ntlm");
-                    if (pa)
+                    // Burrow (Cirtadev GmbH, 2026-11-09): NTLM needs MD4, which Mbed TLS 3 doesn't have. With any
+                    // method allowed, use the proxy's Digest or Basic offer instead of failing in NTLM phase 3.
+                    if (pa && (method == Ntlm || ntlm_available()))
                     {
                         ntlm_auth_phase_1(*pa);
                         return;
@@ -663,6 +665,13 @@ class Client : public TransportClient, AsyncResolvableTCP
                         basic_auth(*pa);
                         return;
                     }
+                }
+
+                // Burrow: the proxy offers only NTLM, and NTLM can't work without MD4.
+                if (get_proxy_authenticate_header("ntlm") && !ntlm_available())
+                {
+                    proxy_error(Error::NTLM_MISSING_CRYPTO, "The HTTP proxy only offers NTLM authentication, which needs MD4 (not in Mbed TLS 3)");
+                    return;
                 }
 
                 throw Exception("HTTP proxy-authenticate method not allowed / supported");
@@ -783,6 +792,20 @@ class Client : public TransportClient, AsyncResolvableTCP
         return "";
     }
 
+    // Burrow (Cirtadev GmbH, 2026-11-09): whether the crypto library can do NTLM (MD4).
+    bool ntlm_available() const
+    {
+        try
+        {
+            config->digest_factory->new_digest(CryptoAlgs::MD4);
+            return true;
+        }
+        catch (const std::exception &)
+        {
+            return false;
+        }
+    }
+
     void ntlm_auth_phase_1(HTTPProxy::ProxyAuthenticate &pa)
     {
         OPENVPN_LOG("Proxy method: NTLM" << std::endl
@@ -852,7 +875,8 @@ class Client : public TransportClient, AsyncResolvableTCP
         catch (const std::exception &e)
         {
             std::string what{e.what()};
-            if (what.find("openssl_digest_error") != std::string::npos)
+            // Burrow: Mbed TLS reports a missing MD4 as mbedtls_digest_error.
+            if (what.find("openssl_digest_error") != std::string::npos || what.find("mbedtls_digest_error") != std::string::npos)
             {
                 proxy_error(Error::NTLM_MISSING_CRYPTO, "Crypto primitives required for NTLM authentication are unavailable");
             }

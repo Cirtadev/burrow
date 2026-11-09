@@ -48,6 +48,16 @@ Modified by Cirtadev GmbH on 2026-11-09, for OpenVPN 3 Core 3.11.8 and Mbed TLS 
   `mbedtls_ssl_set_hostname` fails every handshake with "Attempt to verify a certificate without an expected
   hostname"; OpenVPN checks the server with its own options (`remote-cert-tls`, `verify-x509-name`) and now passes
   no hostname explicitly, as with Mbed TLS 2. Drop this change when updating to an OpenVPN 3 release that has it.
+- `Sources/OpenVPN3/openvpn/mbedtls/crypto/cipher.hpp`: sets PKCS#7 padding on CBC ciphers. Since Mbed TLS 3.5 a
+  CBC context needs an explicit `mbedtls_cipher_set_padding_mode()`; OpenVPN 3 (3.11.8 and `master` on
+  2026-11-03) never calls it, so every `mbedtls_cipher_finish()` failed and an AES-CBC data channel connected but
+  carried no traffic in either direction. PKCS#7 is the padding OpenVPN's CBC mode always used (Mbed TLS 2's
+  default, OpenSSL's). Not reported upstream yet.
+- `Sources/OpenVPN3/openvpn/transport/client/httpcli.hpp`: NTLM proxy login needs MD4, which Mbed TLS 3 doesn't
+  have. When any proxy auth method is allowed, the client now skips the proxy's NTLM offer and uses its Digest or
+  Basic offer (3.11.8 picked NTLM first and failed in its phase 3); a proxy that offers only NTLM ends with
+  `NTLM_MISSING_CRYPTO` and says why; and the phase-3 failure is recognised for Mbed TLS (`mbedtls_digest_error`),
+  not only OpenSSL.
 - `Sources/mbedTLS/include/mbedtls/mbedtls_config.h`: enabled `MBEDTLS_THREADING_C` and
   `MBEDTLS_THREADING_PTHREAD`. Mbed TLS 3.6's PSA crypto (used by TLS 1.3) keeps global state, and Burrow can run
   two OpenVPN client threads at once while it restarts a session. Nothing else differs from the release.
@@ -77,12 +87,33 @@ Modified by Cirtadev GmbH on 2026-11-09, for OpenVPN 3 Core 3.11.8 and Mbed TLS 
 
 ## What changed for connections
 
+Burrow's tunnel (`Tunnel/PacketTunnelProvider.swift`) and BurrowKit (`OpenVPN3Options.swift`) handle what
+OpenVPN 3.11 does differently from 3.6.1:
+
 - TLS 1.3 is available (Mbed TLS 3.6), and TLS 1.2 stays the minimum unless the profile asks for more.
 - OpenVPN 3.11 allows only AEAD data channel ciphers by default; Burrow sets `enableNonPreferredDCAlgorithms` so
-  that AES-CBC with an HMAC keeps working. BF-CBC is gone (Mbed TLS 3 has no Blowfish), and other 64-bit block
-  ciphers stay off.
-- Gone with Mbed TLS 3: NTLM proxy authentication (needs MD4), `ns-cert-type` (use `remote-cert-tls`), and
-  certificates with non-standard validity dates that the old relaxed-date patch accepted. PKCS#12 still can't be
-  read by Mbed TLS: BurrowKit keeps converting `.p12` files with `/usr/bin/openssl`.
+  that AES-CBC with an HMAC (SHA1, SHA256, also MD5) keeps working. BF-CBC is gone (Mbed TLS 3 has no Blowfish):
+  OpenVPN 3 would retry forever, so the tunnel stops with a message naming the cipher. 3DES (64-bit blocks) stays
+  off; a server pinned to it connects but carries no traffic.
+- Compression: OpenVPN 3.11 drops the session as soon as a profile or server uses compression framing
+  (`comp-lzo`, `comp-lzo no`, `compress`, a pushed compressor) unless compression is allowed. Burrow sets
+  `compressionMode = asym`, which is what 3.6.1 did in effect and OpenVPN 2.6's default: decompress what the
+  server sends (LZO with OpenVPN's own decompressor, LZ4), never compress what Burrow sends.
+- OpenVPN 3.11 refuses to connect when the profile has OpenVPN 2 directives it doesn't use (3.6.1 ignored them).
+  BurrowKit leaves out of the tunnel's copy those that only matter to an OpenVPN 2 process or that the server
+  pushes (`log`, `status`, `management…`, `daemon`, `askpass`, `topology`, `ping-exit`, `ncp-disable`, Windows-
+  and Linux-only options, …; the tunnel log names each), turns `ns-cert-type server` into `remote-cert-tls
+  server`, and marks the configuration unusable with an explanation for `socks-proxy`, `fragment`, `verify-hash`,
+  `peer-fingerprint`, `capath` and `x509-username-field`. Anything else OpenVPN refuses ends with a message listing
+  the options.
+- `ns-cert-type server` → `remote-cert-tls server`: Mbed TLS 3 can't check the Netscape certificate type. A server
+  certificate with only `nsCertType=server` and no TLS server extended key usage now fails (closed) with a message
+  saying the certificate must be reissued.
+- NTLM proxy login is gone (no MD4); proxies that also offer Digest or Basic keep working.
+- Unchanged: the default `tls-cert-profile` is `legacy` (SHA-1 signatures and 1024-bit RSA keys accepted, MD5
+  refused), OpenSSL-style `tls-cipher` names are ignored (a list of only such names fails the handshake, as
+  before), `fragment` was never supported. Certificates with non-standard validity dates that OpenVPN's old
+  relaxed-date patch to Mbed TLS 2 accepted no longer parse. PKCS#12 still can't be read by Mbed TLS: BurrowKit
+  keeps converting `.p12` files with `/usr/bin/openssl`.
 - The Mbed TLS backend doesn't implement TLS keying-material export, so `key-derivation tls-ekm` falls back to
   OpenVPN's own key derivation, as before.

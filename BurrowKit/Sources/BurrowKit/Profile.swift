@@ -164,6 +164,8 @@ public struct OVPNSummary: Equatable, Sendable {
     public var usesPKCS12 = false
     /// Files the config names (`ca ca.crt`) instead of carrying them inline; the tunnel can't read them.
     public var missingFiles: [String] = []
+    /// Directives OpenVPN 3 can't honour and Burrow can't leave out safely (`socks-proxy`, `fragment`, …).
+    public var unsupportedDirectives: [OpenVPN3Options.Unsupported] = []
 
     /// Directives that name a file the tunnel would have to read.
     public static let fileDirectives: Set<String> = [
@@ -171,6 +173,7 @@ public struct OVPNSummary: Equatable, Sendable {
     ]
 
     public init(_ text: String) {
+        unsupportedDirectives = OpenVPN3Options.problems(in: text.components(separatedBy: .newlines))
         var inBlock: String?
         for raw in text.components(separatedBy: .newlines) {
             let line = raw.trimmingCharacters(in: .whitespaces)
@@ -275,6 +278,10 @@ public struct OVPNSummary: Equatable, Sendable {
         }
         if let file = missingFiles.first {
             return "The file refers to “\(file)”: import the .ovpn again from the folder that has it."
+        }
+        if let directive = unsupportedDirectives.first {
+            return "The configuration uses “\(directive.name)”, which OpenVPN 3 doesn't support (\(directive.hint)). "
+                + "Remove it from the .ovpn file and import it again."
         }
         return nil
     }
