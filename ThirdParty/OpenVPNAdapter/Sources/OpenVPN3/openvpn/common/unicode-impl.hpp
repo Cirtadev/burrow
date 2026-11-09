@@ -1,3 +1,4 @@
+/* Source: pkg:generic/CVTUTF@02-Nov-2004?download_url=https%3A%2F%2Fweb.archive.org%2Fweb%2F20041122041550%2Fhttp%3A%2F%2Fwww.unicode.org%2FPublic%2FPROGRAMS%2FCVTUTF%2F */
 /*
  * Copyright 2001-2004 Unicode, Inc.
  * 
@@ -23,8 +24,7 @@
 #ifndef OPENVPN_COMMON_UNICODE_IMPL_H
 #define OPENVPN_COMMON_UNICODE_IMPL_H
 
-namespace openvpn {
-  namespace Unicode {
+namespace openvpn::Unicode {
     /* ---------------------------------------------------------------------
 
        Conversions between UTF32, UTF-16, and UTF-8.  Header file.
@@ -471,7 +471,10 @@ namespace openvpn {
         case 1: ch += *source++; ch <<= 6;
         case 0: ch += *source++;
 	}
-	ch -= offsetsFromUTF8[extraBytesToRead];
+
+	if (extraBytesToRead < std::size(offsetsFromUTF8)) {
+	  ch -= offsetsFromUTF8[extraBytesToRead];
+	}
 
 	if (target >= targetEnd) {
 	  source -= (extraBytesToRead+1); /* Back up source pointer! */
@@ -647,7 +650,6 @@ namespace openvpn {
        similarly unrolled loops.
 
        --------------------------------------------------------------------- */
-  }
 }
 
 #endif

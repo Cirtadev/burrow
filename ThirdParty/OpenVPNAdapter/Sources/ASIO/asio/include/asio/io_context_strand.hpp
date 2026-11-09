@@ -2,7 +2,7 @@
 // io_context_strand.hpp
 // ~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2019 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2022 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -17,7 +17,8 @@
 
 #include "asio/detail/config.hpp"
 
-#if !defined(ASIO_NO_EXTENSIONS)
+#if !defined(ASIO_NO_EXTENSIONS) \
+  && !defined(ASIO_NO_TS_EXECUTORS)
 
 #include "asio/async_result.hpp"
 #include "asio/detail/handler_type_requirements.hpp"
@@ -87,6 +88,12 @@ namespace asio {
  */
 class io_context::strand
 {
+private:
+#if !defined(ASIO_NO_DEPRECATED)
+  struct initiate_dispatch;
+  struct initiate_post;
+#endif // !defined(ASIO_NO_DEPRECATED)
+
 public:
   /// Constructor.
   /**
@@ -182,8 +189,11 @@ public:
    * @code void handler(); @endcode
    */
   template <typename LegacyCompletionHandler>
-  ASIO_INITFN_AUTO_RESULT_TYPE(LegacyCompletionHandler, void ())
+  ASIO_INITFN_AUTO_RESULT_TYPE_PREFIX(LegacyCompletionHandler, void ())
   dispatch(ASIO_MOVE_ARG(LegacyCompletionHandler) handler)
+    ASIO_INITFN_AUTO_RESULT_TYPE_SUFFIX((
+      async_initiate<LegacyCompletionHandler, void ()>(
+          declval<initiate_dispatch>(), handler, this)))
   {
     return async_initiate<LegacyCompletionHandler, void ()>(
         initiate_dispatch(), handler, this);
@@ -229,8 +239,11 @@ public:
    * @code void handler(); @endcode
    */
   template <typename LegacyCompletionHandler>
-  ASIO_INITFN_AUTO_RESULT_TYPE(LegacyCompletionHandler, void ())
+  ASIO_INITFN_AUTO_RESULT_TYPE_PREFIX(LegacyCompletionHandler, void ())
   post(ASIO_MOVE_ARG(LegacyCompletionHandler) handler)
+    ASIO_INITFN_AUTO_RESULT_TYPE_SUFFIX((
+      async_initiate<LegacyCompletionHandler, void ()>(
+          declval<initiate_post>(), handler, this)))
   {
     return async_initiate<LegacyCompletionHandler, void ()>(
         initiate_post(), handler, this);
@@ -370,5 +383,6 @@ private:
 #include "asio/detail/pop_options.hpp"
 
 #endif // !defined(ASIO_NO_EXTENSIONS)
+       //   && !defined(ASIO_NO_TS_EXECUTORS)
 
 #endif // ASIO_IO_CONTEXT_STRAND_HPP

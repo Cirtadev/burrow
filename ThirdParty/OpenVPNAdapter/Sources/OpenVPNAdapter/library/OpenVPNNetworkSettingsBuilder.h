@@ -35,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly) NSMutableArray<NSString *> *dnsServers;
 @property (nonatomic, readonly) NSMutableArray<NSString *> *searchDomains;
+@property (nonatomic, readonly) NSMutableArray<NSString *> *matchDomains;
 
 @property (nonatomic, readonly) NSMutableArray<NSString *> *proxyExceptionList;
 

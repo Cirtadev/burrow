@@ -1,12 +1,26 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.9
 
 import PackageDescription
+
+// OpenVPN 3 Core 3.11.8, Mbed TLS 3.6.7 LTS, Asio 1.24.0 with OpenVPN's patches, LZ4 1.10.0 (BURROW-CHANGES.md).
+// The OpenVPN 3 defines must be the same wherever its headers are compiled: the ObjC++ wrapper sees the same
+// ClientAPI classes as the core.
+let openVPNSettings: [CXXSetting] = [
+    .headerSearchPath("../ASIO/asio/include"),
+    .headerSearchPath("../OpenVPN3"),
+    .define("ASIO_STANDALONE"),
+    .define("USE_ASIO"),
+    .define("USE_MBEDTLS"),
+    .define("HAVE_LZ4"),
+    .define("USE_TUN_BUILDER"),
+    .define("OPENVPN_FORCE_TUN_NULL"),
+]
 
 let package = Package(
     name: "OpenVPNAdapter",
     platforms: [
-        .iOS("9.0"),
-        .macOS("10.11"),
+        .iOS(.v13),
+        .macOS(.v10_15),
     ],
     products: [
         .library(name: "OpenVPNAdapter", type: .static, targets: ["OpenVPNAdapter"]),
@@ -19,27 +33,16 @@ let package = Package(
                 .target(name: "OpenVPNClient")
             ],
             sources: ["library"],
-            cxxSettings: [
-                .headerSearchPath("../ASIO/asio/include"),
-                .headerSearchPath("../OpenVPN3"),
-                .define("USE_ASIO")
-            ]
+            cxxSettings: openVPNSettings
         ),
         .target(
             name: "LZ4",
-            sources: ["lib"],
-            cSettings: [
-                .define("XXH_NAMESPACE", to: "LZ4_")
-            ]
+            sources: ["lib/lz4.c"]
         ),
         .target(
-            name: "mbedTLS", 
-            sources: ["library"],
-            cSettings: [
-                .define("MBEDTLS_MD4_C"),
-                .define("MBEDTLS_RELAXED_X509_DATE"),
-                .define("_FILE_OFFSET_BITS", to: "64"),
-            ]
+            name: "mbedTLS",
+            exclude: ["library/CMakeLists.txt", "library/Makefile"],
+            sources: ["library"]
         ),
         .target(
             name: "OpenVPNClient",
@@ -48,20 +51,8 @@ let package = Package(
                 .target(name: "mbedTLS")
             ],
             sources: ["library"],
-            cxxSettings: [
-                .headerSearchPath("../ASIO/asio/include"),
-                .headerSearchPath("../OpenVPN3"),
-                .define("USE_ASIO"),
-                .define("USE_ASIO_THREADLOCAL"),
-                .define("ASIO_STANDALONE"),
-                .define("ASIO_NO_DEPRECATED"),
-                .define("ASIO_HAS_STD_STRING_VIEW"),
-                .define("USE_MBEDTLS"),
-                .define("HAVE_LZ4"),
-                .define("OPENVPN_FORCE_TUN_NULL"),
-                .define("USE_TUN_BUILDER")
-            ]
+            cxxSettings: openVPNSettings
         )
     ],
-    cxxLanguageStandard: .gnucxx14
+    cxxLanguageStandard: .gnucxx17
 )

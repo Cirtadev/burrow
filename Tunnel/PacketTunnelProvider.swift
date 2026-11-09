@@ -228,6 +228,14 @@ final class PacketTunnelProvider: NEPacketTunnelProvider, OpenVPNAdapterDelegate
         configuration.guiVersion = "Burrow \(info?["CFBundleShortVersionString"] as? String ?? "?") (Cirtadev GmbH)"
         // Tells the server (IV_SSO) that Burrow can send the user to a sign-in page and answer CR_TEXT.
         configuration.ssoMethods = "openurl,webauth,crtext"
+        // Without this OpenVPN drops the server's INFO messages, which carry CR_TEXT and WEB_AUTH (handleInfo).
+        configuration.info = true
+        // OpenVPN 3.11 allows only AEAD data channel ciphers (AES-GCM, ChaCha20-Poly1305) unless told otherwise;
+        // keep AES-CBC with an HMAC working for older servers, as before. 64-bit block ciphers stay off.
+        configuration.enableNonPreferredDCAlgorithms = true
+        // Pushed DOMAIN options stay search domains (as with OpenVPN 3.6); the DNS settings below decide
+        // what goes to the VPN's DNS servers.
+        configuration.dhcpSearchDomainsAsSplitDomains = false
         if !profile.keyPassphrase.isEmpty { configuration.privateKeyPassword = profile.keyPassphrase }
         do {
             let evaluation = try adapter.apply(configuration: configuration)
@@ -252,8 +260,7 @@ final class PacketTunnelProvider: NEPacketTunnelProvider, OpenVPNAdapterDelegate
                         credentials.password = password + code
                     }
                 }
-                // If the server hands out a session token, reconnects use it instead of the code.
-                credentials.replacePasswordWithSessionID = true
+                // If the server hands out a session token, OpenVPN's reconnects use it instead of the code.
                 try adapter.provide(credentials: credentials)
             }
         } catch {
@@ -447,9 +454,12 @@ final class PacketTunnelProvider: NEPacketTunnelProvider, OpenVPNAdapterDelegate
             }
         }
         if let dns = networkSettings.dnsSettings {
+            // The VPN's DNS servers answer every lookup, or only names in the server's split-DNS domains
+            // (--dns resolve-domains) and search domains.
+            let domains = (dns.matchDomains ?? []) + (dns.searchDomains ?? [])
             if useVPNDNS {
                 dns.matchDomains = [""]
-            } else if let domains = dns.searchDomains, !domains.isEmpty {
+            } else if !domains.isEmpty {
                 dns.matchDomains = domains
             } else {
                 networkSettings.dnsSettings = nil
@@ -546,6 +556,11 @@ final class PacketTunnelProvider: NEPacketTunnelProvider, OpenVPNAdapterDelegate
                     self.pendingError = TunnelFailure.error(TunnelFailure.credentialsRejected,
                     "The server rejected the password and code twice. Check them in Settings.")
                 }
+            } else if nsError.code == OpenVPNAdapterError.sessionExpired.rawValue {
+                // OpenVPN 3.11: the server refused the session token and signing in again needs more than the
+                // saved password (a web page, a CR_TEXT answer, a typed code). Start over like a new connection.
+                self.restart("the server's session expired")
+                return
             } else if nsError.code == OpenVPNAdapterError.proxyNeedCreds.rawValue {
                 self.pendingError = TunnelFailure.error(TunnelFailure.notConfigured,
                     "The HTTP proxy asks for a login: enter its username and password in Settings.")

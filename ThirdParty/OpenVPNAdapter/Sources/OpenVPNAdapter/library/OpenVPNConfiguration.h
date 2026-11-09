@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 
 typedef NS_ENUM(NSInteger, OpenVPNTransportProtocol);
-typedef NS_ENUM(NSInteger, OpenVPNIPv6Preference);
 typedef NS_ENUM(NSInteger, OpenVPNCompressionMode);
 typedef NS_ENUM(NSInteger, OpenVPNMinTLSVersion);
 typedef NS_ENUM(NSInteger, OpenVPNTLSCertProfile);
@@ -75,11 +74,6 @@ typedef NS_ENUM(NSInteger, OpenVPNTLSCertProfile);
 @property (nonatomic) OpenVPNTransportProtocol proto;
 
 /**
- IPv6 preference
- */
-@property (nonatomic) OpenVPNIPv6Preference ipv6;
-
-/**
  Connection timeout in seconds, or 0 to retry indefinitely
  */
 @property (nonatomic) NSInteger connectionTimeout;
@@ -139,13 +133,22 @@ typedef NS_ENUM(NSInteger, OpenVPNTLSCertProfile);
 @property (nonatomic) NSInteger keyDirection;
 
 /**
- If YES, force ciphersuite to be one of:
- 1. TLS_DHE_RSA_WITH_AES_256_CBC_SHA, or
- 2. TLS_DHE_RSA_WITH_AES_128_CBC_SHA
- and disable setting TLS minimum version.
- This is intended for compatibility with legacy systems.
+ If YES, also allow data channel ciphers that are not AEAD (AES-CBC with an HMAC). By default OpenVPN 3.11 only
+ allows AES-GCM and ChaCha20-Poly1305. Added for Burrow (OpenVPN 3.11 removed forceCiphersuitesAESCBC).
  */
-@property (nonatomic) BOOL forceCiphersuitesAESCBC;
+@property (nonatomic) BOOL enableNonPreferredDCAlgorithms;
+
+/**
+ If YES, also allow legacy algorithms vulnerable to SWEET32 (64-bit block ciphers such as BF-CBC and 3DES) and
+ short digests. Mbed TLS 3 has no Blowfish at all. Added for Burrow.
+ */
+@property (nonatomic) BOOL enableLegacyAlgorithms;
+
+/**
+ If YES (OpenVPN 3.11's default on Apple platforms), --dhcp-option DOMAIN/DOMAIN-SEARCH become split-DNS domains
+ (NEDNSSettings.matchDomains) instead of search domains. Added for Burrow.
+ */
+@property (nonatomic) BOOL dhcpSearchDomainsAsSplitDomains;
 
 /**
  Override the minimum TLS version

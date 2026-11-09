@@ -4,24 +4,17 @@
 //               packet encryption, packet authentication, and
 //               packet compression.
 //
-//    Copyright (C) 2012-2020 OpenVPN Inc.
+//    Copyright (C) 2012- OpenVPN Inc.
 //
-//    This program is free software: you can redistribute it and/or modify
-//    it under the terms of the GNU Affero General Public License Version 3
-//    as published by the Free Software Foundation.
+//    SPDX-License-Identifier: MPL-2.0 OR AGPL-3.0-only WITH openvpn3-openssl-exception
 //
-//    This program is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//    GNU Affero General Public License for more details.
-//
-//    You should have received a copy of the GNU Affero General Public License
-//    along with this program in the COPYING file.
 
 
-#include "test_common.h"
+
+#include "test_common.hpp"
 
 #include <iostream>
+#include <memory>
 
 #include <openvpn/common/exception.hpp>
 #include <openvpn/common/base64.hpp>
@@ -37,7 +30,7 @@ using namespace openvpn;
 
 #include <cstdlib>
 
-std::string ssllib_b64enc(const char* text, size_t textlen)
+std::string ssllib_b64enc(const char *text, size_t textlen)
 {
     BIO *bio, *b64;
 
@@ -45,10 +38,10 @@ std::string ssllib_b64enc(const char* text, size_t textlen)
     bio = BIO_new(BIO_s_mem());
     bio = BIO_push(b64, bio);
 
-    BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL); //Ignore newlines - write everything in one line
+    BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL); // Ignore newlines - write everything in one line
     BIO_write(bio, text, (int)textlen);
     EXPECT_TRUE(BIO_flush(bio) == 1);
-    const char* encdata;
+    const char *encdata;
     long len = BIO_get_mem_data(bio, &encdata);
 
     /* If there is nothing to encode OpenSSL gives back a nullptr */
@@ -63,17 +56,21 @@ std::string ssllib_b64enc(const char* text, size_t textlen)
 #else
 #include <mbedtls/base64.h>
 
-std::string ssllib_b64enc(const char* text, size_t textlen)
+std::string ssllib_b64enc(const char *text, size_t textlen)
 {
     size_t olen, outlen;
 
-    //make a pessimistic assumption about length always calculate 3 padding bytes
-    outlen = 3 + 4*(textlen+3)/3;
+    // make a pessimistic assumption about length always calculate 3 padding bytes
+    outlen = 3 + 4 * (textlen + 3) / 3;
 
     char *dst = new char[outlen];
 
-    EXPECT_EQ(mbedtls_base64_encode(reinterpret_cast<unsigned char*>(dst), outlen,
-        	&olen, reinterpret_cast<const unsigned char*>(text), textlen), 0);
+    EXPECT_EQ(mbedtls_base64_encode(reinterpret_cast<unsigned char *>(dst),
+                                    outlen,
+                                    &olen,
+                                    reinterpret_cast<const unsigned char *>(text),
+                                    textlen),
+              0);
     std::string ret(dst, olen);
     delete[] dst;
     return ret;
@@ -81,7 +78,7 @@ std::string ssllib_b64enc(const char* text, size_t textlen)
 #endif
 
 
-void b64_test(const Base64& b64, const std::string& text)
+void b64_test(const Base64 &b64, const std::string &text)
 {
     const std::string enc = b64.encode(text);
     std::string dec = b64.decode(enc);
@@ -91,21 +88,20 @@ void b64_test(const Base64& b64, const std::string& text)
     EXPECT_EQ(enc, libenc) << "Encode differs from Crypto lib result";
 }
 
-void b64_test_binary(const Base64& b64, const char* data, unsigned int len)
+void b64_test_binary(const Base64 &b64, const char *data, unsigned int len)
 {
     auto enc = b64.encode(data, len);
 
-    char* decdata = new char[len];
-    size_t decode_len = b64.decode(decdata, len, enc);
+    std::unique_ptr<char[]> decdata(new char[len]);
+    size_t decode_len = b64.decode(decdata.get(), len, enc);
     std::string libenc = ssllib_b64enc(data, len);
 
     EXPECT_EQ(enc, libenc) << "Encode differs from Crypto lib result";
 
     ASSERT_EQ(decode_len, len) << "Encode/decode length differs";
-    ASSERT_EQ(std::vector<uint8_t>(decdata, decdata + decode_len),
-	      std::vector<uint8_t>(data, data + len)) << "Encode/Decode results differ";
-
-    delete[] decdata;
+    ASSERT_EQ(std::vector<uint8_t>(decdata.get(), decdata.get() + decode_len),
+              std::vector<uint8_t>(data, data + len))
+        << "Encode/Decode results differ";
 }
 
 TEST(Base64, tooshortdest)
@@ -117,7 +113,7 @@ TEST(Base64, tooshortdest)
     EXPECT_THROW(b64.decode(buf, 2, enc), Base64::base64_decode_out_of_bound_error);
 }
 
-void b64_test_bad_decode(const Base64& b64, const std::string& text)
+void b64_test_bad_decode(const Base64 &b64, const std::string &text)
 {
     std::string dec;
     EXPECT_THROW(b64.decode(dec, text), Base64::base64_decode_error);
@@ -169,13 +165,13 @@ TEST(Base64, binary_data)
 
     const Base64 b64;
     std::srand(0);
-    for(unsigned int i=0;i<20;i++)
+    for (unsigned int i = 0; i < 20; i++)
     {
-        char* data = new char[i];
-        for (unsigned int j=0;j<i;j++)
-	{
-            data[j]=(char)(std::rand() & 0xff);
-	}
+        char *data = new char[i];
+        for (unsigned int j = 0; j < i; j++)
+        {
+            data[j] = (char)(std::rand() & 0xff);
+        }
         b64_test_binary(b64, data, i);
         delete[] data;
     }

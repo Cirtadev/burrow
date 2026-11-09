@@ -95,5 +95,21 @@ typedef NS_ERROR_ENUM(OpenVPNAdapterErrorDomain, OpenVPNAdapterError) {
     OpenVPNAdapterErrorDynamicChallenge,
     OpenVPNAdapterErrorEPKIError,
     OpenVPNAdapterErrorEPKIInvalidAlias,
+    // Added for Burrow by Cirtadev GmbH, 2026-11-09: errors new in OpenVPN 3.11.
+    OpenVPNAdapterErrorTLSSigAlgDisallowedOrUnsupported,
+    OpenVPNAdapterErrorTLSAlertProtocolVersion,
+    OpenVPNAdapterErrorTLSAlertUnknownCA,
+    OpenVPNAdapterErrorTLSAlertHandshakeFailure,
+    OpenVPNAdapterErrorTLSAlertCertificateRequired,
+    OpenVPNAdapterErrorTLSAlertCertificateExpired,
+    OpenVPNAdapterErrorTLSAlertCertificateRevoked,
+    OpenVPNAdapterErrorTLSAlertBadCertificate,
+    OpenVPNAdapterErrorTLSAlertUnsupportedCertificate,
+    OpenVPNAdapterErrorTLSAlertMisc,
+    OpenVPNAdapterErrorEarlyNegotiationInvalid,
+    OpenVPNAdapterErrorNTLMMissingCrypto,
+    OpenVPNAdapterErrorUnusedOptionsError,
+    OpenVPNAdapterErrorSessionExpired,
+    OpenVPNAdapterErrorNeedCredentials,
     OpenVPNAdapterErrorUnknown
 };

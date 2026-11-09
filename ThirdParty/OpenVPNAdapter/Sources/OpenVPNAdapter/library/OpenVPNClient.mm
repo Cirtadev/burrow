@@ -94,14 +94,34 @@ bool OpenVPNClient::tun_builder_exclude_route(const std::string& address, int pr
     }
 }
 
-bool OpenVPNClient::tun_builder_add_dns_server(const std::string& address, bool ipv6) {
-    NSString *dns = [NSString stringWithUTF8String:address.c_str()];
-    return [this->delegate addDNS:dns];
-}
-
-bool OpenVPNClient::tun_builder_add_search_domain(const std::string& domain) {
-    NSString *searchDomain = [NSString stringWithUTF8String:domain.c_str()];
-    return [this->delegate addSearchDomain:searchDomain];
+// Changed for Burrow by Cirtadev GmbH, 2026-11-09: OpenVPN 3.11 hands over all DNS settings at once (from
+// --dhcp-option DNS/DNS6/DOMAIN or --dns). NEDNSSettings has one server list: the servers' addresses in priority
+// order. --dns resolve-domains become match domains. NEDNSSettings can't take a port or DoT/DoH here, so those
+// servers are used as plain DNS on port 53 (inside the tunnel), and the log says so.
+bool OpenVPNClient::tun_builder_set_dns_options(const DnsOptions& dns) {
+    for (const auto& entry : dns.servers) {
+        const DnsServer& server = entry.second;
+        for (const DnsAddress& address : server.addresses) {
+            if (address.port != 0 && address.port != 53) {
+                NSString *message = [NSString stringWithFormat:@"DNS server %s: port %u not supported, using 53",
+                                     address.address.c_str(), address.port];
+                [this->delegate clientLogMessage:message];
+            }
+            [this->delegate addDNS:[NSString stringWithUTF8String:address.address.c_str()]];
+        }
+        if (server.transport == DnsServer::Transport::HTTPS || server.transport == DnsServer::Transport::TLS) {
+            NSString *message = [NSString stringWithFormat:@"DNS server priority %d: %s not supported, using plain DNS",
+                                 entry.first, server.transport_string().c_str()];
+            [this->delegate clientLogMessage:message];
+        }
+        for (const DnsDomain& domain : server.domains) {
+            [this->delegate addMatchDomain:[NSString stringWithUTF8String:domain.domain.c_str()]];
+        }
+    }
+    for (const DnsDomain& domain : dns.search_domains) {
+        [this->delegate addSearchDomain:[NSString stringWithUTF8String:domain.domain.c_str()]];
+    }
+    return true;
 }
 
 bool OpenVPNClient::tun_builder_set_mtu(int mtu) {
@@ -139,10 +159,6 @@ bool OpenVPNClient::tun_builder_set_proxy_https(const std::string& host, int por
     return [this->delegate setProxyServer:proxyServer protocol:OpenVPNProxyServerProtocolHTTPS];
 }
 
-bool OpenVPNClient::tun_builder_set_block_ipv6(bool block_ipv6) {
-    return block_ipv6;
-}
-
 int OpenVPNClient::tun_builder_establish() {
     return [this->delegate establishTunnel] ? [this->delegate socketHandle] : INVALID_SOCKET;
 }
@@ -156,7 +172,7 @@ void OpenVPNClient::tun_builder_teardown(bool disconnect) {
     [this->delegate resetTun];
 }
 
-bool OpenVPNClient::socket_protect(int socket, std::string remote, bool ipv6) {
+bool OpenVPNClient::socket_protect(openvpn_io::detail::socket_type socket, std::string remote, bool ipv6) {
     return true;
 }
 
@@ -176,6 +192,14 @@ void OpenVPNClient::event(const ClientAPI::Event& ev) {
     } else {
         [this->delegate clientEventName:name message:message.length ? message : nil];
     }
+}
+
+// Added for Burrow by Cirtadev GmbH, 2026-11-09: OpenVPN 3.11 made it required. Burrow announces no custom
+// control-channel protocols (appCustomProtocols), so these only log.
+void OpenVPNClient::acc_event(const ClientAPI::AppCustomControlMessageEvent& event) {
+    NSString *message = [NSString stringWithFormat:@"custom control message (%s, %zu bytes)",
+                         event.protocol.c_str(), event.payload.size()];
+    [this->delegate clientLogMessage:message];
 }
 
 void OpenVPNClient::log(const ClientAPI::LogInfo& log) {

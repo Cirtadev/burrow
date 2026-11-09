@@ -33,6 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)addDNS:(NSString *)dns;
 - (BOOL)addSearchDomain:(NSString *)domain;
+- (BOOL)addMatchDomain:(NSString *)domain;
 
 - (BOOL)setMTU:(NSNumber *)mtu;
 - (BOOL)setSessionName:(NSString *)name;
@@ -73,27 +74,26 @@ public:
     bool tun_builder_reroute_gw(bool ipv4, bool ipv6, unsigned int flags) override;
     bool tun_builder_add_route(const std::string& address, int prefix_length, int metric, bool ipv6) override;
     bool tun_builder_exclude_route(const std::string& address, int prefix_length, int metric, bool ipv6) override;
-    bool tun_builder_add_dns_server(const std::string& address, bool ipv6) override;
-    bool tun_builder_add_search_domain(const std::string& domain) override;
+    bool tun_builder_set_dns_options(const DnsOptions& dns) override;
     bool tun_builder_set_mtu(int mtu) override;
     bool tun_builder_set_session_name(const std::string& name) override;
     bool tun_builder_add_proxy_bypass(const std::string& bypass_host) override;
     bool tun_builder_set_proxy_auto_config_url(const std::string& urlString) override;
     bool tun_builder_set_proxy_http(const std::string& host, int port) override;
     bool tun_builder_set_proxy_https(const std::string& host, int port) override;
-    bool tun_builder_set_block_ipv6(bool block_ipv6) override;
     
     int tun_builder_establish() override;
     bool tun_builder_persist() override;
     void tun_builder_teardown(bool disconnect) override;
     
-    bool socket_protect(int socket, std::string remote, bool ipv6) override;
+    bool socket_protect(openvpn_io::detail::socket_type socket, std::string remote, bool ipv6) override;
     bool pause_on_connection_timeout() override;
     
     void external_pki_cert_request(ClientAPI::ExternalPKICertRequest& certreq) override;
     void external_pki_sign_request(ClientAPI::ExternalPKISignRequest& signreq) override;
     
     void event(const ClientAPI::Event& event) override;
+    void acc_event(const ClientAPI::AppCustomControlMessageEvent& event) override;
     void log(const ClientAPI::LogInfo& log) override;
     
     void clock_tick() override;

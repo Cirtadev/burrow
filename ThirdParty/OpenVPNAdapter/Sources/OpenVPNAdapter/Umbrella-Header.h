@@ -19,7 +19,6 @@ FOUNDATION_EXPORT const unsigned char OpenVPNAdapterVersionString[];
 #import <OpenVPNAdapter/OpenVPNError.h>
 #import <OpenVPNAdapter/OpenVPNAdapterEvent.h>
 #import <OpenVPNAdapter/OpenVPNTransportProtocol.h>
-#import <OpenVPNAdapter/OpenVPNIPv6Preference.h>
 #import <OpenVPNAdapter/OpenVPNCompressionMode.h>
 #import <OpenVPNAdapter/OpenVPNMinTLSVersion.h>
 #import <OpenVPNAdapter/OpenVPNTLSCertProfile.h>

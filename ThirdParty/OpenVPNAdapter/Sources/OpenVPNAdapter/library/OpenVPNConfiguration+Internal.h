@@ -21,8 +21,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (OpenVPNTransportProtocol)getTransportProtocolFromValue:(nullable NSString *)value;
 + (NSString *)getValueFromTransportProtocol:(OpenVPNTransportProtocol)protocol;
 
-+ (OpenVPNIPv6Preference)getIPv6PreferenceFromValue:(nullable NSString *)value;
-+ (NSString *)getValueFromIPv6Preference:(OpenVPNIPv6Preference)preference;
 
 + (OpenVPNCompressionMode)getCompressionModeFromValue:(nullable NSString *)value;
 + (NSString *)getValueFromCompressionMode:(OpenVPNCompressionMode)compressionMode;

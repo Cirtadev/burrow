@@ -21,5 +21,7 @@ typedef NS_ENUM(NSInteger, OpenVPNMinTLSVersion) {
     /// Use TLS 1.2 minimum (overrides profile)
     OpenVPNMinTLSVersion12,
     /// Use profile minimum
-    OpenVPNMinTLSVersionDefault
+    OpenVPNMinTLSVersionDefault,
+    /// Use TLS 1.3 minimum (overrides profile). Added for Burrow (OpenVPN 3.11 with Mbed TLS 3.6).
+    OpenVPNMinTLSVersion13
 };

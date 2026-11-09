@@ -3,11 +3,13 @@ Third party libraries used by the OpenVPNAdapter project:
 ==========================================================================
 
 --------------------------------------------------------------------
-Dependency: https://github.com/OpenVPN/openvpn3
+Dependency: https://github.com/OpenVPN/openvpn3 (OpenVPN 3 Core 3.11.8)
 License type: GNU Affero General Public License - Version 3.0
+(OpenVPN 3 Core is offered under AGPL-3.0-only or MPL-2.0; used here under AGPL-3.0,
+see Sources/OpenVPN3/LICENSE.md)
 --------------------------------------------------------------------
 OpenVPN Library
-Copyright (C) 2017 OpenVPN Inc.
+Copyright (C) 2012- OpenVPN Inc.
 
 GNU AFFERO GENERAL PUBLIC LICENSE
 Version 3, 19 November 2007
@@ -673,11 +675,13 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 
 
 --------------------------------------------------------------------
-Dependency: https://github.com/ARMmbed/mbedtls
+Dependency: https://github.com/Mbed-TLS/mbedtls (Mbed TLS 3.6.7)
 License type: Apache License - Version 2.0
+(Mbed TLS is offered under Apache-2.0 or GPL-2.0-or-later; used here under Apache-2.0,
+see Sources/mbedTLS/LICENSE)
 --------------------------------------------------------------------
-mbedTLS Library
-Copyright (C) 2008 - 2016 ARM Limited
+Mbed TLS Library
+Copyright The Mbed TLS Contributors
 
 Apache License
 Version 2.0, January 2004
@@ -883,11 +887,11 @@ limitations under the License.
 
 
 --------------------------------------------------------------------
-Dependency: https://github.com/chriskohlhoff/asio
+Dependency: https://github.com/chriskohlhoff/asio (Asio 1.24.0 with OpenVPN's patches)
 License type: Boost Software License - Version 1.0
 --------------------------------------------------------------------
 ASIO Library
-Copyright (C) 2003-2017 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+Copyright (C) 2003-2022 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 Distributed under the Boost Software License, Version 1.0.
 
 Boost Software License - Version 1.0 - August 17th, 2003
@@ -916,11 +920,11 @@ DEALINGS IN THE SOFTWARE.
 
 
 --------------------------------------------------------------------
-Dependency: https://github.com/lz4/lz4
+Dependency: https://github.com/lz4/lz4 (LZ4 1.10.0, lib/ only)
 License type: BSD 2-Clause License
 --------------------------------------------------------------------
 LZ4 Library
-Copyright (C) 2011-2016, Yann Collet
+Copyright (C) 2011-2020, Yann Collet
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,

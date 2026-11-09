@@ -51,7 +51,9 @@
 #pragma mark - OpenVPNClient Lifecycle
 
 + (nullable OpenVPNConfigurationEvaluation *)evaluateConfiguration:(OpenVPNConfiguration *)configuration error:(NSError **)error {
-    ClientAPI::EvalConfig eval = OpenVPNClient::eval_config_static(configuration.config);
+    // OpenVPN 3.11 moved the static helpers to OpenVPNClientHelper (Burrow, 2026-11-09).
+    ClientAPI::OpenVPNClientHelper helper;
+    ClientAPI::EvalConfig eval = helper.eval_config(configuration.config);
     
     if (eval.error) {
         if (error) {
@@ -157,11 +159,11 @@
 #pragma mark - OpenVPNClient Information
 
 + (NSString *)copyright {
-    return [NSString stringWithUTF8String:OpenVPNClient::copyright().c_str()];
+    return [NSString stringWithUTF8String:ClientAPI::OpenVPNClientHelper::copyright().c_str()];
 }
 
 + (NSString *)platform {
-    return [NSString stringWithUTF8String:OpenVPNClient::platform().c_str()];
+    return [NSString stringWithUTF8String:ClientAPI::OpenVPNClientHelper::platform().c_str()];
 }
 
 - (OpenVPNConnectionInfo *)connectionInformation {
@@ -289,6 +291,16 @@
     }
     
     [self.networkSettingsBuilder.searchDomains addObject:domain];
+    return YES;
+}
+
+// Added for Burrow by Cirtadev GmbH, 2026-11-09: --dns resolve-domains (OpenVPN 3.11).
+- (BOOL)addMatchDomain:(NSString *)domain {
+    if ([self.networkSettingsBuilder.matchDomains containsObject:domain]) {
+        return NO;
+    }
+    
+    [self.networkSettingsBuilder.matchDomains addObject:domain];
     return YES;
 }
 

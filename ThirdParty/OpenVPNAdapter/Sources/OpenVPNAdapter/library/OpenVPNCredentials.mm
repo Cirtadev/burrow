@@ -60,20 +60,4 @@ using namespace openvpn;
     _credentials.dynamicChallengeCookie = dynamicChallengeCookie ? std::string([dynamicChallengeCookie UTF8String]) : "";
 }
 
-- (BOOL)replacePasswordWithSessionID {
-    return _credentials.replacePasswordWithSessionID;
-}
-
-- (void)setReplacePasswordWithSessionID:(BOOL)replacePasswordWithSessionID {
-    _credentials.replacePasswordWithSessionID = replacePasswordWithSessionID;
-}
-
-- (BOOL)cachePassword {
-    return _credentials.cachePassword;
-}
-
-- (void)setCachePassword:(BOOL)cachePassword {
-    _credentials.cachePassword = cachePassword;
-}
-
 @end

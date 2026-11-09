@@ -159,8 +159,9 @@ entries win over the local network; Local entries become excluded routes. Change
   at once with *Open Burrow to connect*, and a running Burrow then connects the configuration itself.
 - Keeping the OTP secret next to the password turns two factors into one: anyone with the unlocked Mac can
   connect. Check that this fits the VPN owner's policy.
-- OpenVPNAdapter vendors OpenVPN 3.6.1 and mbedTLS 2.7.12 (2021-era). They work with TLS 1.2+ servers, but a newer
-  OpenVPN 3 core would be better for a long-lived setup.
+- The tunnel runs OpenVPN 3 Core 3.11.8 with Mbed TLS 3.6.7 LTS (TLS 1.2 and 1.3), vendored in
+  `ThirdParty/OpenVPNAdapter` ([what Burrow changed](../ThirdParty/OpenVPNAdapter/BURROW-CHANGES.md)). Mbed TLS 3.6
+  is maintained until March 2027; OpenVPN 3 doesn't support Mbed TLS 4 yet.
 
 ## Development
 

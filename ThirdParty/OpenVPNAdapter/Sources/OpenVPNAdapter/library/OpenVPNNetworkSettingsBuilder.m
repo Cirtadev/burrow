@@ -25,6 +25,7 @@
 
 @property (nonatomic) NSMutableArray<NSString *> *dnsServers;
 @property (nonatomic) NSMutableArray<NSString *> *searchDomains;
+@property (nonatomic) NSMutableArray<NSString *> *matchDomains;
 
 @property (nonatomic) NSMutableArray<NSString *> *proxyExceptionList;
 
@@ -66,6 +67,7 @@
     if (self.dnsServers.ovpn_isNotEmpty) {
         NEDNSSettings *dnsSettings = [[NEDNSSettings alloc] initWithServers:self.dnsServers];
         dnsSettings.searchDomains = self.searchDomains;
+        if (self.matchDomains.ovpn_isNotEmpty) { dnsSettings.matchDomains = self.matchDomains; }
         networkSettings.DNSSettings = dnsSettings;
     }
     
@@ -138,6 +140,11 @@
 - (NSMutableArray<NSString *> *)searchDomains {
     if (!_searchDomains) { _searchDomains = [[NSMutableArray alloc] init]; }
     return _searchDomains;
+}
+
+- (NSMutableArray<NSString *> *)matchDomains {
+    if (!_matchDomains) { _matchDomains = [[NSMutableArray alloc] init]; }
+    return _matchDomains;
 }
 
 - (NSMutableArray<NSString *> *)proxyExceptionList {

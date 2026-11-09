@@ -10,7 +10,6 @@
 #import "OpenVPNConfiguration+Internal.h"
 
 #import "OpenVPNTransportProtocol.h"
-#import "OpenVPNIPv6Preference.h"
 #import "OpenVPNCompressionMode.h"
 #import "OpenVPNMinTLSVersion.h"
 #import "OpenVPNTLSCertProfile.h"
@@ -22,10 +21,6 @@ NSString *const OpenVPNTransportProtocolTCPValue = @"tcp";
 NSString *const OpenVPNTransportProtocolAdaptiveValue = @"adaptive";
 NSString *const OpenVPNTransportProtocolDefaultValue = @"";
 
-NSString *const OpenVPNIPv6PreferenceEnabledValue = @"yes";
-NSString *const OpenVPNIPv6PreferenceDisabledValue = @"no";
-NSString *const OpenVPNIPv6PreferenceDefaultValue = @"default";
-
 NSString *const OpenVPNCompressionModeEnabledValue = @"yes";
 NSString *const OpenVPNCompressionModeDisabledValue = @"no";
 NSString *const OpenVPNCompressionModeAsymValue = @"asym";
@@ -35,6 +30,7 @@ NSString *const OpenVPNMinTLSVersionDisabledValue = @"disabled";
 NSString *const OpenVPNMinTLSVersion10Value = @"tls_1_0";
 NSString *const OpenVPNMinTLSVersion11Value = @"tls_1_1";
 NSString *const OpenVPNMinTLSVersion12Value = @"tls_1_2";
+NSString *const OpenVPNMinTLSVersion13Value = @"tls_1_3";
 NSString *const OpenVPNMinTLSVersionDefaultValue = @"default";
 
 NSString *const OpenVPNTLSCertProfileLegacyValue = @"legacy";
@@ -86,34 +82,6 @@ NSString *const OpenVPNTLSCertProfileDefaultValue = @"default";
     return value;
 }
 
-+ (OpenVPNIPv6Preference)getIPv6PreferenceFromValue:(nullable NSString *)value {
-    NSDictionary *options = @{
-        OpenVPNIPv6PreferenceEnabledValue: @(OpenVPNIPv6PreferenceEnabled),
-        OpenVPNIPv6PreferenceDisabledValue: @(OpenVPNIPv6PreferenceDisabled),
-        OpenVPNIPv6PreferenceDefaultValue: @(OpenVPNIPv6PreferenceDefault)
-    };
-    
-    NSString *currentValue = [value length] == 0 ? OpenVPNIPv6PreferenceDefaultValue : value;
-    
-    NSNumber *ipv6 = options[currentValue];
-    NSAssert(ipv6 != nil, @"Incorrect ipv6 value: %@", currentValue);
-    
-    return (OpenVPNIPv6Preference)[ipv6 integerValue];
-}
-
-+ (nonnull NSString *)getValueFromIPv6Preference:(OpenVPNIPv6Preference)preference {
-    NSDictionary *options = @{
-        @(OpenVPNIPv6PreferenceEnabled): OpenVPNIPv6PreferenceEnabledValue,
-        @(OpenVPNIPv6PreferenceDisabled): OpenVPNIPv6PreferenceDisabledValue,
-        @(OpenVPNIPv6PreferenceDefault): OpenVPNIPv6PreferenceDefaultValue
-    };
-    
-    NSString *value = options[@(preference)];
-    NSAssert(value != nil, @"Incorrect ipv6 value: %li", (long)preference);
-    
-    return value;
-}
-
 + (OpenVPNCompressionMode)getCompressionModeFromValue:(nullable NSString *)value {
     NSDictionary *options = @{
         OpenVPNCompressionModeEnabledValue: @(OpenVPNCompressionModeEnabled),
@@ -150,6 +118,7 @@ NSString *const OpenVPNTLSCertProfileDefaultValue = @"default";
         OpenVPNMinTLSVersion10Value: @(OpenVPNMinTLSVersion10),
         OpenVPNMinTLSVersion11Value: @(OpenVPNMinTLSVersion11),
         OpenVPNMinTLSVersion12Value: @(OpenVPNMinTLSVersion12),
+        OpenVPNMinTLSVersion13Value: @(OpenVPNMinTLSVersion13),
         OpenVPNMinTLSVersionDefaultValue: @(OpenVPNMinTLSVersionDefault)
     };
     
@@ -167,6 +136,7 @@ NSString *const OpenVPNTLSCertProfileDefaultValue = @"default";
         @(OpenVPNMinTLSVersion10): OpenVPNMinTLSVersion10Value,
         @(OpenVPNMinTLSVersion11): OpenVPNMinTLSVersion11Value,
         @(OpenVPNMinTLSVersion12): OpenVPNMinTLSVersion12Value,
+        @(OpenVPNMinTLSVersion13): OpenVPNMinTLSVersion13Value,
         @(OpenVPNMinTLSVersionDefault): OpenVPNMinTLSVersionDefaultValue
     };
     
@@ -219,7 +189,8 @@ NSString *const OpenVPNTLSCertProfileDefaultValue = @"default";
 }
 
 - (void)setFileContent:(NSData *)fileContent {
-    _config.content = fileContent.length ? std::string((const char *)fileContent.bytes) : "";
+    // Burrow, 2026-11-09: NSData isn't NUL-terminated, so copy exactly its length.
+    _config.content = fileContent.length ? std::string((const char *)fileContent.bytes, fileContent.length) : "";
 }
 
 - (NSDictionary<NSString *,NSString *> *)settings {
@@ -314,16 +285,6 @@ NSString *const OpenVPNTLSCertProfileDefaultValue = @"default";
     _config.protoOverride = std::string([value UTF8String]);
 }
 
-- (OpenVPNIPv6Preference)ipv6 {
-    NSString *currentValue = [NSString stringWithUTF8String:_config.ipv6.c_str()];
-    return [OpenVPNConfiguration getIPv6PreferenceFromValue:currentValue];
-}
-
-- (void)setIpv6:(OpenVPNIPv6Preference)ipv6 {
-    NSString *value = [OpenVPNConfiguration getValueFromIPv6Preference:ipv6];
-    _config.ipv6 = std::string([value UTF8String]);
-}
-
 - (NSInteger)connectionTimeout {
     return _config.connTimeout;
 }
@@ -414,12 +375,28 @@ NSString *const OpenVPNTLSCertProfileDefaultValue = @"default";
     _config.defaultKeyDirection = keyDirection;
 }
 
-- (BOOL)forceCiphersuitesAESCBC {
-    return _config.forceAesCbcCiphersuites;
+- (BOOL)enableNonPreferredDCAlgorithms {
+    return _config.enableNonPreferredDCAlgorithms;
 }
 
-- (void)setForceCiphersuitesAESCBC:(BOOL)forceCiphersuitesAESCBC {
-    _config.forceAesCbcCiphersuites = forceCiphersuitesAESCBC;
+- (void)setEnableNonPreferredDCAlgorithms:(BOOL)enableNonPreferredDCAlgorithms {
+    _config.enableNonPreferredDCAlgorithms = enableNonPreferredDCAlgorithms;
+}
+
+- (BOOL)enableLegacyAlgorithms {
+    return _config.enableLegacyAlgorithms;
+}
+
+- (void)setEnableLegacyAlgorithms:(BOOL)enableLegacyAlgorithms {
+    _config.enableLegacyAlgorithms = enableLegacyAlgorithms;
+}
+
+- (BOOL)dhcpSearchDomainsAsSplitDomains {
+    return _config.dhcpSearchDomainsAsSplitDomains;
+}
+
+- (void)setDhcpSearchDomainsAsSplitDomains:(BOOL)dhcpSearchDomainsAsSplitDomains {
+    _config.dhcpSearchDomainsAsSplitDomains = dhcpSearchDomainsAsSplitDomains;
 }
 
 - (OpenVPNMinTLSVersion)minTLSVersion {
@@ -534,7 +511,6 @@ NSString *const OpenVPNTLSCertProfileDefaultValue = @"default";
     configuration.platformVersion = [self.platformVersion copyWithZone:zone];
     configuration.server = [self.server copyWithZone:zone];
     configuration.proto = self.proto;
-    configuration.ipv6 = self.ipv6;
     configuration.connectionTimeout = self.connectionTimeout;
     configuration.tunPersist = self.tunPersist;
     configuration.googleDNSFallback = self.googleDNSFallback;
@@ -545,7 +521,9 @@ NSString *const OpenVPNTLSCertProfileDefaultValue = @"default";
     configuration.compressionMode = self.compressionMode;
     configuration.privateKeyPassword = [self.privateKeyPassword copyWithZone:zone];
     configuration.keyDirection = self.keyDirection;
-    configuration.forceCiphersuitesAESCBC = self.forceCiphersuitesAESCBC;
+    configuration.enableNonPreferredDCAlgorithms = self.enableNonPreferredDCAlgorithms;
+    configuration.enableLegacyAlgorithms = self.enableLegacyAlgorithms;
+    configuration.dhcpSearchDomainsAsSplitDomains = self.dhcpSearchDomainsAsSplitDomains;
     configuration.minTLSVersion = self.minTLSVersion;
     configuration.tlsCertProfile = self.tlsCertProfile;
     configuration.peerInfo = [self.peerInfo copyWithZone:zone];
@@ -564,7 +542,6 @@ NSString *const OpenVPNTLSCertProfileDefaultValue = @"default";
     [aCoder encodeObject:self.platformVersion forKey:NSStringFromSelector(@selector(platformVersion))];
     [aCoder encodeObject:self.server forKey:NSStringFromSelector(@selector(server))];
     [aCoder encodeInteger:self.proto forKey:NSStringFromSelector(@selector(proto))];
-    [aCoder encodeInteger:self.ipv6 forKey:NSStringFromSelector(@selector(ipv6))];
     [aCoder encodeInteger:self.connectionTimeout forKey:NSStringFromSelector(@selector(connectionTimeout))];
     [aCoder encodeBool:self.tunPersist forKey:NSStringFromSelector(@selector(tunPersist))];
     [aCoder encodeBool:self.googleDNSFallback forKey:NSStringFromSelector(@selector(googleDNSFallback))];
@@ -575,7 +552,9 @@ NSString *const OpenVPNTLSCertProfileDefaultValue = @"default";
     [aCoder encodeInteger:self.compressionMode forKey:NSStringFromSelector(@selector(compressionMode))];
     [aCoder encodeObject:self.privateKeyPassword forKey:NSStringFromSelector(@selector(privateKeyPassword))];
     [aCoder encodeInteger:self.keyDirection forKey:NSStringFromSelector(@selector(keyDirection))];
-    [aCoder encodeBool:self.forceCiphersuitesAESCBC forKey:NSStringFromSelector(@selector(forceCiphersuitesAESCBC))];
+    [aCoder encodeBool:self.enableNonPreferredDCAlgorithms forKey:NSStringFromSelector(@selector(enableNonPreferredDCAlgorithms))];
+    [aCoder encodeBool:self.enableLegacyAlgorithms forKey:NSStringFromSelector(@selector(enableLegacyAlgorithms))];
+    [aCoder encodeBool:self.dhcpSearchDomainsAsSplitDomains forKey:NSStringFromSelector(@selector(dhcpSearchDomainsAsSplitDomains))];
     [aCoder encodeInteger:self.minTLSVersion forKey:NSStringFromSelector(@selector(minTLSVersion))];
     [aCoder encodeInteger:self.tlsCertProfile forKey:NSStringFromSelector(@selector(tlsCertProfile))];
     [aCoder encodeObject:self.peerInfo forKey:NSStringFromSelector(@selector(peerInfo))];
@@ -594,7 +573,6 @@ NSString *const OpenVPNTLSCertProfileDefaultValue = @"default";
         self.platformVersion = [aDecoder decodeObjectOfClass:[NSString class] forKey:NSStringFromSelector(@selector(platformVersion))];
         self.server = [aDecoder decodeObjectOfClass:[NSString class] forKey:NSStringFromSelector(@selector(server))];
         self.proto = (OpenVPNTransportProtocol)[aDecoder decodeIntegerForKey:NSStringFromSelector(@selector(proto))];
-        self.ipv6 = (OpenVPNIPv6Preference)[aDecoder decodeIntegerForKey:NSStringFromSelector(@selector(ipv6))];
         self.connectionTimeout = [aDecoder decodeIntegerForKey:NSStringFromSelector(@selector(connectionTimeout))];
         self.tunPersist = [aDecoder decodeBoolForKey:NSStringFromSelector(@selector(tunPersist))];
         self.googleDNSFallback = [aDecoder decodeBoolForKey:NSStringFromSelector(@selector(googleDNSFallback))];
@@ -605,7 +583,11 @@ NSString *const OpenVPNTLSCertProfileDefaultValue = @"default";
         self.compressionMode = (OpenVPNCompressionMode)[aDecoder decodeIntegerForKey:NSStringFromSelector(@selector(compressionMode))];
         self.privateKeyPassword = [aDecoder decodeObjectOfClass:[NSString class] forKey:NSStringFromSelector(@selector(privateKeyPassword))];
         self.keyDirection = [aDecoder decodeIntegerForKey:NSStringFromSelector(@selector(keyDirection))];
-        self.forceCiphersuitesAESCBC = [aDecoder decodeBoolForKey:NSStringFromSelector(@selector(forceCiphersuitesAESCBC))];
+        self.enableNonPreferredDCAlgorithms = [aDecoder decodeBoolForKey:NSStringFromSelector(@selector(enableNonPreferredDCAlgorithms))];
+        self.enableLegacyAlgorithms = [aDecoder decodeBoolForKey:NSStringFromSelector(@selector(enableLegacyAlgorithms))];
+        if ([aDecoder containsValueForKey:NSStringFromSelector(@selector(dhcpSearchDomainsAsSplitDomains))]) {
+            self.dhcpSearchDomainsAsSplitDomains = [aDecoder decodeBoolForKey:NSStringFromSelector(@selector(dhcpSearchDomainsAsSplitDomains))];
+        }
         self.minTLSVersion = (OpenVPNMinTLSVersion)[aDecoder decodeIntegerForKey:NSStringFromSelector(@selector(minTLSVersion))];
         self.tlsCertProfile = (OpenVPNTLSCertProfile)[aDecoder decodeIntegerForKey:NSStringFromSelector(@selector(tlsCertProfile))];
         self.peerInfo = [aDecoder decodeObjectOfClass:[NSDictionary class] forKey:NSStringFromSelector(@selector(peerInfo))];

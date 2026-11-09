@@ -317,7 +317,7 @@ struct AboutView: View {
     static let credits: [(name: String, role: String, license: String)] = [
         ("OpenVPN 3 Core", "VPN protocol engine, © OpenVPN Inc.", "AGPLv3"),
         ("OpenVPNAdapter", "Objective-C wrapper, © Sergey Abramchuk", "AGPLv3"),
-        ("Mbed TLS 2.7", "TLS and cryptography", "Apache 2.0"),
+        ("Mbed TLS 3.6", "TLS and cryptography", "Apache 2.0"),
         ("Asio", "networking", "Boost Software License"),
         ("LZ4", "compression", "BSD 2-Clause"),
         ("Sparkle", "software updates", "MIT"),

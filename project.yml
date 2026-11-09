@@ -22,7 +22,8 @@ packages:
   BurrowKit:
     path: BurrowKit
   OpenVPNAdapter:
-    # Upstream revision 33afba0 plus a control-channel send for CR_TEXT answers (ThirdParty/OpenVPNAdapter/BURROW-CHANGES.md).
+    # Upstream wrapper 33afba0 on OpenVPN 3 Core 3.11.8 + Mbed TLS 3.6.7, plus a control-channel send for CR_TEXT
+    # answers (ThirdParty/OpenVPNAdapter/BURROW-CHANGES.md).
     path: ThirdParty/OpenVPNAdapter
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle

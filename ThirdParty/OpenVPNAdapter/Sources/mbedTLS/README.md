@@ -1,56 +1,90 @@
 README for Mbed TLS
 ===================
 
+Mbed TLS is a C library that implements cryptographic primitives (including the [PSA Cryptography API](#psa-cryptography-api)), X.509 certificate manipulation and the SSL/TLS and DTLS protocols. Its small code footprint makes it suitable for embedded systems.
+
 Configuration
 -------------
 
-Mbed TLS should build out of the box on most systems. Some platform specific options are available in the fully documented configuration file `include/mbedtls/config.h`, which is also the place where features can be selected. This file can be edited manually, or in a more programmatic way using the Perl script `scripts/config.pl` (use `--help` for usage instructions).
+Mbed TLS should build out of the box on most systems. Some platform specific options are available in the fully documented configuration file `include/mbedtls/mbedtls_config.h`, which is also the place where features can be selected. This file can be edited manually, or in a more programmatic way using the Python 3 script `scripts/config.py` (use `--help` for usage instructions).
 
 Compiler options can be set using conventional environment variables such as `CC` and `CFLAGS` when using the Make and CMake build system (see below).
+
+We provide some non-standard configurations focused on specific use cases in the `configs/` directory. You can read more about those in `configs/README.txt`
+
+Documentation
+-------------
+
+The main Mbed TLS documentation is available via [ReadTheDocs](https://mbed-tls.readthedocs.io/).
+
+Documentation for the PSA Cryptography API is available [on GitHub](https://arm-software.github.io/psa-api/crypto/).
+
+To generate a local copy of the library documentation in HTML format, tailored to your compile-time configuration:
+
+1. Make sure that [Doxygen](http://www.doxygen.nl/) is installed.
+1. Run `make apidoc`.
+1. Browse `apidoc/index.html` or `apidoc/modules.html`.
+
+For other sources of documentation, see the [SUPPORT](SUPPORT.md) document.
 
 Compiling
 ---------
 
-There are currently four active build systems used within Mbed TLS releases:
+There are currently three active build systems used within Mbed TLS releases:
 
--   yotta
 -   GNU Make
 -   CMake
--   Microsoft Visual Studio (Microsoft Visual Studio 2010 or later)
+-   Microsoft Visual Studio
 
 The main systems used for development are CMake and GNU Make. Those systems are always complete and up-to-date. The others should reflect all changes present in the CMake and Make build system, although features may not be ported there automatically.
 
-Yotta, as a build system, is slightly different from the other build systems:
+The Make and CMake build systems create three libraries: libmbedcrypto, libmbedx509, and libmbedtls. Note that libmbedtls depends on libmbedx509 and libmbedcrypto, and libmbedx509 depends on libmbedcrypto. As a result, some linkers will expect flags to be in a specific order, for example the GNU linker wants `-lmbedtls -lmbedx509 -lmbedcrypto`.
 
--   it provides a minimalistic configuration file by default
--   depending on the yotta target, features of Mbed OS may be used in examples and tests
+### Tool versions
 
-The Make and CMake build systems create three libraries: libmbedcrypto, libmbedx509, and libmbedtls. Note that libmbedtls depends on libmbedx509 and libmbedcrypto, and libmbedx509 depends on libmbedcrypto. As a result, some linkers will expect flags to be in a specific order, for example the GNU linker wants `-lmbedtls -lmbedx509 -lmbedcrypto`. Also, when loading shared libraries using dlopen(), you'll need to load libmbedcrypto first, then libmbedx509, before you can load libmbedtls.
+You need the following tools to build the library with the provided makefiles:
 
-### Yotta
+* GNU Make 3.82 or a build tool that CMake supports.
+* A C99 toolchain (compiler, linker, archiver). We actively test with GCC 5.4, Clang 3.8, Arm Compiler 6, IAR 8 and Visual Studio 2017. More recent versions should work. Slightly older versions may work.
+* Python 3.8 to generate the test code. Python is also needed to integrate PSA drivers and to build the development branch (see next section).
+* Perl to run the tests, and to generate some source files in the development branch.
+* CMake 3.10.2 or later (if using CMake).
+* Microsoft Visual Studio 2017 or later (if using Visual Studio).
+* Doxygen 1.8.11 or later (if building the documentation; slightly older versions should work).
 
-[yotta](http://yottabuild.org) is a package manager and build system developed by Mbed, and is the build system of Mbed OS 16.03. To install it on your platform, please follow the yotta [installation instructions](http://docs.yottabuild.org/#installing).
+### Git usage
 
-Once yotta is installed, you can use it to download the latest version of Mbed TLS from the yotta registry with:
+The `development` branch and the `mbedtls-3.6` long-term support branch of Mbed TLS use a [Git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules#_cloning_submodules) ([framework](https://github.com/Mbed-TLS/mbedtls-framework)). This is not needed to merely compile the library at a release tag. This is not needed to consume a release archive (zip or tar).
 
-    yotta install mbedtls
+### Generated source files in the development branch
 
-and build it with:
+The source code of Mbed TLS includes some files that are automatically generated by scripts and whose content depends only on the Mbed TLS source, not on the platform or on the library configuration. These files are not included in the development branch of Mbed TLS, but the generated files are included in official releases. This section explains how to generate the missing files in the development branch.
 
-    yotta build
+The following tools are required:
 
-If, on the other hand, you already have a copy of Mbed TLS from a source other than the yotta registry, for example from cloning our GitHub repository, or from downloading a tarball of the standalone edition, then you'll first need to generate the yotta module by running:
+* Perl, for some library source files and for Visual Studio build files.
+* Python 3.8 and some Python packages, for some library source files, sample programs and test data. To install the necessary packages, run:
+    ```
+    python3 -m pip install --user -r scripts/basic.requirements.txt
+    ```
+    Depending on your Python installation, you may need to invoke `python` instead of `python3`. To install the packages system-wide, omit the `--user` option.
+* A C compiler for the host platform, for some test data.
 
-    yotta/create-module.sh
+The scripts that generate the configuration-independent files will look for a host C compiler in the following places (in order of preference):
 
-This should be executed from the root Mbed TLS project directory. This will create the yotta module in the `yotta/module` directory within it. You can then change to that directory and build as usual:
+1. The `HOSTCC` environment variable. This can be used if `CC` is pointing to a cross-compiler.
+2. The `CC` environment variable.
+3. An executable called `cc` in the current path.
 
-    cd yotta/module
-    yotta build
+Note: If you have multiple toolchains installed, it is recommended to set `CC` or `HOSTCC` to the intended host compiler before generating the files.
 
-In any case, you'll probably want to set the yotta target before building unless it has already been set globally. For more information on using yotta, please consult the [yotta documentation](http://docs.yottabuild.org/).
+Any of the following methods are available to generate the configuration-independent files:
 
-For more details on the yotta/Mbed OS edition of Mbed TLS, including example programs, please consult the [Readme at the root of the yotta module](https://github.com/ARMmbed/mbedtls/blob/development/yotta/data/README.md).
+* If not cross-compiling, running `make` with any target, or just `make`, will automatically generate required files.
+* On non-Windows systems, when not cross-compiling, CMake will generate the required files automatically.
+* Run `make generated_files` to generate all the configuration-independent files.
+* On Unix/POSIX systems, run `tests/scripts/check-generated-files.sh -u` to generate all the configuration-independent files.
+* On Windows, run `scripts\make_generated_files.bat` to generate all the configuration-independent files.
 
 ### Make
 
@@ -66,7 +100,7 @@ In order to run the tests, enter:
 
     make check
 
-The tests need Perl to be built and run. If you don't have Perl installed, you can skip building the tests with:
+The tests need Python to be built and Perl to be run. If you don't have one of them installed, you can skip building the tests with:
 
     make no_test
 
@@ -78,11 +112,11 @@ In order to build for a Windows platform, you should use `WINDOWS_BUILD=1` if th
 
 Setting the variable `SHARED` in your environment will build shared libraries in addition to the static libraries. Setting `DEBUG` gives you a debug build. You can override `CFLAGS` and `LDFLAGS` by setting them in your environment or on the make command line; compiler warning options may be overridden separately using `WARNING_CFLAGS`. Some directory-specific options (for example, `-I` directives) are still preserved.
 
-Please note that setting `CFLAGS` overrides its default value of `-O2` and setting `WARNING_CFLAGS` overrides its default value (starting with `-Wall -W`), so it you just want to add some warning options to the default ones, you can do so by setting `CFLAGS=-O2 -Werror` for example. Setting `WARNING_CFLAGS` is useful when you want to get rid of its default content (for example because your compiler doesn't accept `-Wall` as an option). Directory-specific options cannot be overridden from the command line.
+Please note that setting `CFLAGS` overrides its default value of `-O2` and setting `WARNING_CFLAGS` overrides its default value (starting with `-Wall -Wextra`), so if you just want to add some warning options to the default ones, you can do so by setting `CFLAGS=-O2 -Werror` for example. Setting `WARNING_CFLAGS` is useful when you want to get rid of its default content (for example because your compiler doesn't accept `-Wall` as an option). Directory-specific options cannot be overridden from the command line.
 
-Depending on your platform, you might run into some issues. Please check the Makefiles in `library/`, `programs/` and `tests/` for options to manually add or remove for specific platforms. You can also check [the Mbed TLS Knowledge Base](https://tls.mbed.org/kb) for articles on your platform or issue.
+Depending on your platform, you might run into some issues. Please check the Makefiles in `library/`, `programs/` and `tests/` for options to manually add or remove for specific platforms. You can also check [the Mbed TLS Knowledge Base](https://mbed-tls.readthedocs.io/en/latest/kb/) for articles on your platform or issue.
 
-In case you find that you need to do something else as well, please let us know what, so we can add it to the [Mbed TLS knowledge base](https://tls.mbed.org/kb).
+In case you find that you need to do something else as well, please let us know what, so we can add it to the [Mbed TLS Knowledge Base](https://mbed-tls.readthedocs.io/en/latest/kb/).
 
 ### CMake
 
@@ -90,13 +124,13 @@ In order to build the source using CMake in a separate directory (recommended), 
 
     mkdir /path/to/build_dir && cd /path/to/build_dir
     cmake /path/to/mbedtls_source
-    make
+    cmake --build .
 
 In order to run the tests, enter:
 
-    make test
+    ctest
 
-The test suites need Perl to be built. If you don't have Perl installed, you'll want to disable the test suites with:
+The test suites need Python to be built and Perl to be executed. If you don't have one of these installed, you'll want to disable the test suites with:
 
     cmake -DENABLE_TESTING=Off /path/to/mbedtls_source
 
@@ -160,59 +194,143 @@ Regarding variables, also note that if you set CFLAGS when invoking cmake,
 your value of CFLAGS doesn't override the content provided by cmake (depending
 on the build mode as seen above), it's merely prepended to it.
 
+#### Consuming Mbed TLS
+
+Mbed TLS provides a package config file for consumption as a dependency in other
+CMake projects. You can include Mbed TLS's CMake targets yourself with:
+
+    find_package(MbedTLS)
+
+If prompted, set `MbedTLS_DIR` to `${YOUR_MBEDTLS_INSTALL_DIR}/cmake`. This
+creates the following targets:
+
+- `MbedTLS::mbedcrypto` (Crypto library)
+- `MbedTLS::mbedtls` (TLS library)
+- `MbedTLS::mbedx509` (X509 library)
+
+You can then use these directly through `target_link_libraries()`:
+
+    add_executable(xyz)
+
+    target_link_libraries(xyz
+        PUBLIC MbedTLS::mbedtls
+               MbedTLS::mbedcrypto
+               MbedTLS::mbedx509)
+
+This will link the Mbed TLS libraries to your library or application, and add
+its include directories to your target (transitively, in the case of `PUBLIC` or
+`INTERFACE` link libraries).
+
+#### Mbed TLS as a subproject
+
+Mbed TLS supports being built as a CMake subproject. One can
+use `add_subdirectory()` from a parent CMake project to include Mbed TLS as a
+subproject.
+
 ### Microsoft Visual Studio
 
-The build files for Microsoft Visual Studio are generated for Visual Studio 2010.
+The build files for Microsoft Visual Studio are generated for Visual Studio 2017.
 
-The solution file `mbedTLS.sln` contains all the basic projects needed to build the library and all the programs. The files in tests are not generated and compiled, as these need a perl environment as well. However, the selftest program in `programs/test/` is still available.
+The solution file `mbedTLS.sln` contains all the basic projects needed to build the library and all the programs. The files in tests are not generated and compiled, as these need Python and perl environments as well. However, the selftest program in `programs/test/` is still available.
+
+In the development branch of Mbed TLS, the Visual Studio solution files need to be generated first as described in [“Generated source files in the development branch”](#generated-source-files-in-the-development-branch).
 
 Example programs
 ----------------
 
-We've included example programs for a lot of different features and uses in `programs/`. Most programs only focus on a single feature or usage scenario, so keep that in mind when copying parts of the code.
+We've included example programs for a lot of different features and uses in [`programs/`](programs/README.md).
+Please note that the goal of these sample programs is to demonstrate specific features of the library, and the code may need to be adapted to build a real-world application.
 
 Tests
 -----
 
-Mbed TLS includes an elaborate test suite in `tests/` that initially requires Perl to generate the tests files (e.g. `test\_suite\_mpi.c`). These files are generated from a `function file` (e.g. `suites/test\_suite\_mpi.function`) and a `data file` (e.g. `suites/test\_suite\_mpi.data`). The `function file` contains the test functions. The `data file` contains the test cases, specified as parameters that will be passed to the test function.
+Mbed TLS includes an elaborate test suite in `tests/` that initially requires Python to generate the tests files (e.g. `test\_suite\_mpi.c`). These files are generated from a `function file` (e.g. `suites/test\_suite\_mpi.function`) and a `data file` (e.g. `suites/test\_suite\_mpi.data`). The `function file` contains the test functions. The `data file` contains the test cases, specified as parameters that will be passed to the test function.
 
 For machines with a Unix shell and OpenSSL (and optionally GnuTLS) installed, additional test scripts are available:
 
 -   `tests/ssl-opt.sh` runs integration tests for various TLS options (renegotiation, resumption, etc.) and tests interoperability of these options with other implementations.
 -   `tests/compat.sh` tests interoperability of every ciphersuite with other implementations.
 -   `tests/scripts/test-ref-configs.pl` test builds in various reduced configurations.
--   `tests/scripts/key-exchanges.pl` test builds in configurations with a single key exchange enabled
--   `tests/scripts/all.sh` runs a combination of the above tests, plus some more, with various build options (such as ASan, full `config.h`, etc).
+-   `tests/scripts/depends.py` test builds in configurations with a single curve, key exchange, hash, cipher, or pkalg on.
+-   `tests/scripts/all.sh` runs a combination of the above tests, plus some more, with various build options (such as ASan, full `mbedtls_config.h`, etc).
 
-Configurations
---------------
-
-We provide some non-standard configurations focused on specific use cases in the `configs/` directory. You can read more about those in `configs/README.txt`
+Instead of manually installing the required versions of all tools required for testing, it is possible to use the Docker images from our CI systems, as explained in [our testing infrastructure repository](https://github.com/Mbed-TLS/mbedtls-test/blob/main/README.md#quick-start).
 
 Porting Mbed TLS
 ----------------
 
-Mbed TLS can be ported to many different architectures, OS's and platforms. Before starting a port, you may find the following knowledge base articles useful:
+Mbed TLS can be ported to many different architectures, OS's and platforms. Before starting a port, you may find the following Knowledge Base articles useful:
 
--   [Porting Mbed TLS to a new environment or OS](https://tls.mbed.org/kb/how-to/how-do-i-port-mbed-tls-to-a-new-environment-OS)
--   [What external dependencies does Mbed TLS rely on?](https://tls.mbed.org/kb/development/what-external-dependencies-does-mbedtls-rely-on)
--   [How do I configure Mbed TLS](https://tls.mbed.org/kb/compiling-and-building/how-do-i-configure-mbedtls)
+-   [Porting Mbed TLS to a new environment or OS](https://mbed-tls.readthedocs.io/en/latest/kb/how-to/how-do-i-port-mbed-tls-to-a-new-environment-OS/)
+-   [What external dependencies does Mbed TLS rely on?](https://mbed-tls.readthedocs.io/en/latest/kb/development/what-external-dependencies-does-mbedtls-rely-on/)
+-   [How do I configure Mbed TLS](https://mbed-tls.readthedocs.io/en/latest/kb/compiling-and-building/how-do-i-configure-mbedtls/)
+
+Mbed TLS is mostly written in portable C99; however, it has a few platform requirements that go beyond the standard, but are met by most modern architectures:
+
+- Bytes must be 8 bits.
+- All-bits-zero must be a valid representation of a null pointer.
+- Signed integers must be represented using two's complement.
+- `int` and `size_t` must be at least 32 bits wide.
+- The types `uint8_t`, `uint16_t`, `uint32_t` and their signed equivalents must be available.
+- Mixed-endian platforms are not supported.
+- SIZE_MAX must be at least as big as INT_MAX and UINT_MAX.
+
+PSA cryptography API
+--------------------
+
+### PSA API
+
+Arm's [Platform Security Architecture (PSA)](https://developer.arm.com/architectures/security-architectures/platform-security-architecture) is a holistic set of threat models, security analyses, hardware and firmware architecture specifications, and an open source firmware reference implementation. PSA provides a recipe, based on industry best practice, that allows security to be consistently designed in, at both a hardware and firmware level.
+
+The [PSA cryptography API](https://arm-software.github.io/psa-api/crypto/) provides access to a set of cryptographic primitives. It has a dual purpose. First, it can be used in a PSA-compliant platform to build services, such as secure boot, secure storage and secure communication. Second, it can also be used independently of other PSA components on any platform.
+
+The design goals of the PSA cryptography API include:
+
+* The API distinguishes caller memory from internal memory, which allows the library to be implemented in an isolated space for additional security. Library calls can be implemented as direct function calls if isolation is not desired, and as remote procedure calls if isolation is desired.
+* The structure of internal data is hidden to the application, which allows substituting alternative implementations at build time or run time, for example, in order to take advantage of hardware accelerators.
+* All access to the keys happens through key identifiers, which allows support for external cryptoprocessors that is transparent to applications.
+* The interface to algorithms is generic, favoring algorithm agility.
+* The interface is designed to be easy to use and hard to accidentally misuse.
+
+Arm welcomes feedback on the design of the API. If you think something could be improved, please open an issue on our Github repository. Alternatively, if you prefer to provide your feedback privately, please email us at [`mbed-crypto@arm.com`](mailto:mbed-crypto@arm.com). All feedback received by email is treated confidentially.
+
+### PSA implementation in Mbed TLS
+
+Mbed TLS includes an implementation of the PSA Cryptography API. It covers most, but not all algorithms.
+
+The X.509 and TLS code can use PSA cryptography for most operations. To enable this support, activate the compilation option `MBEDTLS_USE_PSA_CRYPTO` in `mbedtls_config.h`. Note that TLS 1.3 uses PSA cryptography for most operations regardless of this option. See `docs/use-psa-crypto.md` for details.
+
+### PSA drivers
+
+Mbed TLS supports drivers for cryptographic accelerators, secure elements and random generators. This is work in progress. Please note that the driver interfaces are not fully stable yet and may change without notice. We intend to preserve backward compatibility for application code (using the PSA Crypto API), but the code of the drivers may have to change in future minor releases of Mbed TLS.
+
+Please see the [PSA driver example and guide](docs/psa-driver-example-and-guide.md) for information on writing a driver.
+
+When using drivers, you will generally want to enable two compilation options (see the reference manual for more information):
+
+* `MBEDTLS_USE_PSA_CRYPTO` is necessary so that the X.509 and TLS code calls the PSA drivers rather than the built-in software implementation.
+* `MBEDTLS_PSA_CRYPTO_CONFIG` allows you to enable PSA cryptographic mechanisms without including the code of the corresponding software implementation. This is not yet supported for all mechanisms.
+
+License
+-------
+
+Unless specifically indicated otherwise in a file, Mbed TLS files are provided under a dual [Apache-2.0](https://spdx.org/licenses/Apache-2.0.html) OR [GPL-2.0-or-later](https://spdx.org/licenses/GPL-2.0-or-later.html) license. See the [LICENSE](LICENSE) file for the full text of these licenses, and [the 'License and Copyright' section in the contributing guidelines](CONTRIBUTING.md#License-and-Copyright) for more information.
+
+### Third-party code included in Mbed TLS
+
+This project contains code from other projects. This code is located within the `3rdparty/` directory. The original license text is included within project subdirectories, where it differs from the normal Mbed TLS license, and/or in source files. The projects are listed below:
+
+* `3rdparty/everest/`: Files stem from [Project Everest](https://project-everest.github.io/) and are distributed under the Apache 2.0 license.
+* `3rdparty/p256-m/p256-m/`: Files have been taken from the [p256-m](https://github.com/mpg/p256-m) repository. The code in the original repository is distributed under the Apache 2.0 license. It is distributed in Mbed TLS under a dual Apache-2.0 OR GPL-2.0-or-later license with permission from the author.
 
 Contributing
 ------------
 
-We gratefully accept bug reports and contributions from the community. There are some requirements we need to fulfill in order to be able to integrate contributions:
+We gratefully accept bug reports and contributions from the community. Please see the [contributing guidelines](CONTRIBUTING.md) for details on how to do this.
 
--   All contributions, whether large or small require a Contributor's License Agreement (CLA) to be accepted. This is because source code can possibly fall under copyright law and we need your consent to share in the ownership of the copyright.
--   We would ask that contributions conform to [our coding standards](https://tls.mbed.org/kb/development/mbedtls-coding-standards), and that contributions should be fully tested before submission.
--   As with any open source project, contributions will be reviewed by the project team and community and may need some modifications to be accepted.
+Contact
+-------
 
-To accept the Contributor’s Licence Agreement (CLA), individual contributors can do this by creating an Mbed account and [accepting the online agreement here with a click through](https://os.mbed.com/contributor_agreement/). Alternatively, for contributions from corporations, or those that do not wish to create an Mbed account, a slightly different agreement can be found [here](https://www.mbed.com/en/about-mbed/contributor-license-agreements/). This agreement should be signed and returned to Arm as described in the instructions given.
-
-### Making a Contribution
-
-1.  [Check for open issues](https://github.com/ARMmbed/mbedtls/issues) or [start a discussion](https://forums.mbed.com/c/mbed-tls) around a feature idea or a bug.
-2.  Fork the [Mbed TLS repository on GitHub](https://github.com/ARMmbed/mbedtls) to start making your changes. As a general rule, you should use the "development" branch as a basis.
-3.  Write a test which shows that the bug was fixed or that the feature works as expected.
-4.  Send a pull request and bug us until it gets merged and published. Contributions may need some modifications, so work with us to get your change accepted. We will include your name in the ChangeLog :)
-
+* To report a security vulnerability in Mbed TLS, please email <mbed-tls-security@lists.trustedfirmware.org>. For more information, see [`SECURITY.md`](SECURITY.md).
+* To report a bug or request a feature in Mbed TLS, please [file an issue on GitHub](https://github.com/Mbed-TLS/mbedtls/issues/new/choose).
+* Please see [`SUPPORT.md`](SUPPORT.md) for other channels for discussion and support about Mbed TLS.

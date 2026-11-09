@@ -106,7 +106,22 @@
         @"PKTID_TIME_BACKTRACK": @(OpenVPNAdapterErrorPKTIDTimeBacktrack),
         @"DYNAMIC_CHALLENGE": @(OpenVPNAdapterErrorDynamicChallenge),
         @"EPKI_ERROR": @(OpenVPNAdapterErrorEPKIError),
-        @"EPKI_INVALID_ALIAS": @(OpenVPNAdapterErrorEPKIInvalidAlias)
+        @"EPKI_INVALID_ALIAS": @(OpenVPNAdapterErrorEPKIInvalidAlias),
+        @"TLS_SIGALG_DISALLOWED_OR_UNSUPPORTED": @(OpenVPNAdapterErrorTLSSigAlgDisallowedOrUnsupported),
+        @"TLS_ALERT_PROTOCOL_VERSION": @(OpenVPNAdapterErrorTLSAlertProtocolVersion),
+        @"TLS_ALERT_UNKNOWN_CA": @(OpenVPNAdapterErrorTLSAlertUnknownCA),
+        @"TLS_ALERT_HANDSHAKE_FAILURE": @(OpenVPNAdapterErrorTLSAlertHandshakeFailure),
+        @"TLS_ALERT_CERTIFICATE_REQUIRED": @(OpenVPNAdapterErrorTLSAlertCertificateRequired),
+        @"TLS_ALERT_CERTIFICATE_EXPIRED": @(OpenVPNAdapterErrorTLSAlertCertificateExpired),
+        @"TLS_ALERT_CERTIFICATE_REVOKED": @(OpenVPNAdapterErrorTLSAlertCertificateRevoked),
+        @"TLS_ALERT_BAD_CERTIFICATE": @(OpenVPNAdapterErrorTLSAlertBadCertificate),
+        @"TLS_ALERT_UNSUPPORTED_CERTIFICATE": @(OpenVPNAdapterErrorTLSAlertUnsupportedCertificate),
+        @"TLS_ALERT_MISC": @(OpenVPNAdapterErrorTLSAlertMisc),
+        @"EARLY_NEG_INVALID": @(OpenVPNAdapterErrorEarlyNegotiationInvalid),
+        @"NTLM_MISSING_CRYPTO": @(OpenVPNAdapterErrorNTLMMissingCrypto),
+        @"UNUSED_OPTIONS_ERROR": @(OpenVPNAdapterErrorUnusedOptionsError),
+        @"SESSION_EXPIRED": @(OpenVPNAdapterErrorSessionExpired),
+        @"NEED_CREDS": @(OpenVPNAdapterErrorNeedCredentials)
     };
     
     OpenVPNAdapterError error = errors[errorName] != nil ?
@@ -190,6 +205,21 @@
         case OpenVPNAdapterErrorDynamicChallenge: return nil;
         case OpenVPNAdapterErrorEPKIError: return nil;
         case OpenVPNAdapterErrorEPKIInvalidAlias: return nil;
+        case OpenVPNAdapterErrorTLSSigAlgDisallowedOrUnsupported: return @"The TLS signature algorithm is disallowed or unsupported.";
+        case OpenVPNAdapterErrorTLSAlertProtocolVersion: return @"The peer rejected the TLS version (TLS alert).";
+        case OpenVPNAdapterErrorTLSAlertUnknownCA: return @"The peer doesn't know the CA of our certificate (TLS alert).";
+        case OpenVPNAdapterErrorTLSAlertHandshakeFailure: return @"TLS handshake failure (TLS alert).";
+        case OpenVPNAdapterErrorTLSAlertCertificateRequired: return @"The peer requires a client certificate (TLS alert).";
+        case OpenVPNAdapterErrorTLSAlertCertificateExpired: return @"The peer reports an expired certificate (TLS alert).";
+        case OpenVPNAdapterErrorTLSAlertCertificateRevoked: return @"The peer reports a revoked certificate (TLS alert).";
+        case OpenVPNAdapterErrorTLSAlertBadCertificate: return @"The peer reports a bad certificate (TLS alert).";
+        case OpenVPNAdapterErrorTLSAlertUnsupportedCertificate: return @"The peer reports an unsupported certificate (TLS alert).";
+        case OpenVPNAdapterErrorTLSAlertMisc: return @"TLS alert from the peer.";
+        case OpenVPNAdapterErrorEarlyNegotiationInvalid: return @"Invalid early negotiation from the server.";
+        case OpenVPNAdapterErrorNTLMMissingCrypto: return @"NTLM proxy authentication needs MD4, which Mbed TLS 3 doesn't provide.";
+        case OpenVPNAdapterErrorUnusedOptionsError: return @"The profile has options OpenVPN 3 doesn't use.";
+        case OpenVPNAdapterErrorSessionExpired: return @"The server's session (auth-token) expired: sign in again.";
+        case OpenVPNAdapterErrorNeedCredentials: return @"OpenVPN needs credentials that were not provided.";
         case OpenVPNAdapterErrorUnknown: return @"Unknown error.";
     }
 }

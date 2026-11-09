@@ -13,6 +13,12 @@
 #import "OpenVPNKeyType.h"
 #import "NSError+OpenVPNError.h"
 
+// Burrow, 2026-11-09: Mbed TLS 3 wants a random generator to parse keys (RSA blinding).
+static int OpenVPNPrivateKeyRandom(void *context, unsigned char *output, size_t length) {
+    arc4random_buf(output, length);
+    return 0;
+}
+
 @interface OpenVPNPrivateKey ()
 
 @property (nonatomic, assign) mbedtls_pk_context *ctx;
@@ -30,7 +36,8 @@
     size_t password_length = password != nil ? strlen(password.UTF8String) : 0;
     
     int result = mbedtls_pk_parse_key(key.ctx, (const unsigned char *)pemString.UTF8String,
-                                      pem_length, (const unsigned char *)password.UTF8String, password_length);
+                                      pem_length, (const unsigned char *)password.UTF8String, password_length,
+                                      OpenVPNPrivateKeyRandom, NULL);
     
     if (result < 0) {
         if (error) {
@@ -49,7 +56,8 @@
     size_t password_length = password != nil ? strlen(password.UTF8String) : 0;
     
     int result = mbedtls_pk_parse_key(key.ctx, derData.bytes,
-                                      derData.length, (const unsigned char *)password.UTF8String, password_length);
+                                      derData.length, (const unsigned char *)password.UTF8String, password_length,
+                                      OpenVPNPrivateKeyRandom, NULL);
     
     if (result < 0) {
         if (error) {
