@@ -12,7 +12,7 @@ entries keep working. The repository must stay public: Sparkle can't download fr
 
 1. Raise `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in `project.yml`. The build number must grow with
    every release: Sparkle compares it, and macOS only replaces the installed tunnel extension when it changes.
-2. Optionally write `release/notes/<version>.html` (the release notes Sparkle shows).
+2. Optionally write `release/notes/<version>.html`: the release notes Sparkle shows, also on the GitHub release page.
 3. In Terminal.app (the scripts use your Xcode account, which sandboxed tools can't reach):
 
    ```bash

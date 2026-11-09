@@ -42,7 +42,10 @@ echo "About to publish Burrow $VERSION to https://github.com/$REPO/releases/tag/
 read -r -p "Type yes to continue: " answer
 [ "$answer" = "yes" ] || die "cancelled"
 
+# The release page shows the same notes as Sparkle (release/notes/<version>.html, HTML GitHub renders as is).
+NOTES="Download Burrow-$VERSION.dmg, open it and drag Burrow to Applications (macOS 15 or later). Source code: Burrow-$VERSION-source.tar.gz (AGPL-3.0)."
+[ -f "release/notes/$VERSION.html" ] && NOTES="$(cat "release/notes/$VERSION.html")"$'\n\n'"$NOTES"
 gh release create "v$VERSION" --repo "$REPO" --title "Burrow $VERSION" \
-    --notes "Download Burrow-$VERSION.dmg, open it and drag Burrow to Applications (macOS 15 or later). Source code: Burrow-$VERSION-source.tar.gz (AGPL-3.0)." \
+    --notes "$NOTES" \
     "$OUT/Burrow-$VERSION.dmg" "$OUT/Burrow-$VERSION.zip" "$OUT/Burrow-$VERSION-source.tar.gz" "$OUT/SHA256SUMS" "$APPCAST"
 echo "Published. Burrow's update feed: https://github.com/$REPO/releases/latest/download/appcast.xml"
