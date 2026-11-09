@@ -1,0 +1,5 @@
+<ul>
+<li>New VPN engine: OpenVPN 3.11.8 with Mbed TLS 3.6 LTS, which adds TLS 1.3. The previous one, OpenVPN 3.6.1 with Mbed TLS 2.7, no longer got security fixes.</li>
+<li>Older configurations keep working: Burrow leaves out OpenVPN 2 settings the new engine refuses (log and status files, management, …) and turns <code>ns-cert-type server</code> into <code>remote-cert-tls server</code>.</li>
+<li>No longer supported: the Blowfish (BF-CBC) and 3DES ciphers, SOCKS proxies, proxies that accept only NTLM logins, server certificates marked only with the old Netscape server type, and the <code>fragment</code>, <code>verify-hash</code>, <code>peer-fingerprint</code>, <code>capath</code> and <code>x509-username-field</code> settings.</li>
+</ul>

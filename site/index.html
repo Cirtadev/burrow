@@ -253,8 +253,9 @@
         </details>
         <details>
           <summary>Which VPNs does it work with?</summary>
-          <p>Any OpenVPN server you connect to with an <code>.ovpn</code> configuration, over TLS 1.2 or later.
-            Burrow doesn't support certificates on a smart card (PKCS#11) or static-key configurations.</p>
+          <p>Any OpenVPN server you connect to with an <code>.ovpn</code> configuration, over TLS 1.2 or 1.3.
+            Burrow doesn't support certificates on a smart card (PKCS#11), static-key configurations, the old
+            Blowfish (BF-CBC) and 3DES ciphers, SOCKS proxies or proxies that accept only NTLM logins.</p>
         </details>
         <details>
           <summary>Do I still need Tunnelblick?</summary>
